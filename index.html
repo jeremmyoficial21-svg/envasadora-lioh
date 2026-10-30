@@ -1,0 +1,1455 @@
+<title>Envasadora LiOH · maqueta</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: panel de operador estilo HMI de alto desempeño (gris, color solo para estados), simulador arriba, documentación técnica abajo en una columna con navegación fija. */
+:root{
+  --bg:#e8ebe7; --panel:#f6f7f4; --sunk:#dfe3de; --ink:#1b2320; --muted:#56625c; --line:#c4cbc4;
+  --accent:#1d6b73; --accent-ink:#ffffff; --run:#2c7a4b; --wait:#b77a06; --alarm:#b8322a; --steel:#7d8a84;
+  --off:#c9cfc9; --product:#d9d2c3; --product-edge:#a79c86; --wire:#7d8a84;
+  --f-display:"Barlow Semi Condensed","Arial Narrow",Arial,sans-serif;
+  --f-body:"Barlow","Segoe UI",Arial,sans-serif;
+  --f-mono:"JetBrains Mono",Consolas,"Courier New",monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#141917; --panel:#1c2220; --sunk:#232a27; --ink:#e3e8e4; --muted:#9aa69f; --line:#323b37;
+  --accent:#4fb0ba; --accent-ink:#0d1413; --run:#4cbf78; --wait:#e2a531; --alarm:#ef6b5c; --steel:#7f8c86;
+  --off:#3a4440; --product:#b9b09c; --product-edge:#8b816d; --wire:#7f8c86; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141917; --panel:#1c2220; --sunk:#232a27; --ink:#e3e8e4; --muted:#9aa69f; --line:#323b37;
+  --accent:#4fb0ba; --accent-ink:#0d1413; --run:#4cbf78; --wait:#e2a531; --alarm:#ef6b5c; --steel:#7f8c86;
+  --off:#3a4440; --product:#b9b09c; --product-edge:#8b816d; --wire:#7f8c86; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 48px}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.wrap{max-width:1180px;margin:0 auto}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;letter-spacing:.01em}
+h1{font-size:clamp(26px,4vw,36px);font-weight:700}
+h2{font-size:26px;font-weight:700}
+h3{font-size:19px;font-weight:600}
+p{margin:0}
+.mono{font-family:var(--f-mono);font-size:.86em}
+code{font-family:var(--f-mono);font-size:.86em;background:var(--sunk);padding:1px 5px;border-radius:4px}
+a{color:var(--accent)}
+header.top{padding-block:28px 14px;display:flex;flex-wrap:wrap;gap:12px 24px;align-items:flex-end;justify-content:space-between}
+header.top .lede{color:var(--muted);max-width:62ch;margin-top:6px}
+.tag{font-family:var(--f-display);text-transform:uppercase;letter-spacing:.08em;font-size:12px;font-weight:600;color:var(--muted)}
+nav.sec{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);border-bottom:1px solid var(--line);
+  display:flex;gap:4px;overflow-x:auto;padding-block:8px;margin-bottom:20px;scrollbar-width:thin}
+nav.sec a{font-family:var(--f-display);font-weight:600;font-size:15px;text-decoration:none;color:var(--muted);padding:6px 12px;border-radius:6px;white-space:nowrap}
+nav.sec a:hover,nav.sec a:focus-visible{color:var(--ink);background:var(--sunk);outline:none}
+section{scroll-margin-top:64px;margin-top:44px}
+section > .head{display:flex;flex-direction:column;gap:6px;margin-bottom:16px;max-width:72ch}
+section > .head p{color:var(--muted)}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px}
+
+/* ---------- Simulador ---------- */
+.sim{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:16px;align-items:start}
+@media (max-width:980px){.sim{grid-template-columns:minmax(0,1fr)}}
+.mimic{padding:12px 12px 8px}
+.mimic-bar{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;justify-content:space-between;padding:2px 4px 8px}
+.mimic svg{width:100%;height:auto;display:block}
+.svgbox{overflow-x:auto}
+.svgbox svg{min-width:640px}
+.ctrls{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;font-size:14px;color:var(--muted)}
+.ctrls label{display:flex;gap:6px;align-items:center}
+select,input[type=number]{font:inherit;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:4px 6px}
+input[type=number]{width:84px;font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.btn{font-family:var(--f-display);font-weight:600;font-size:15px;letter-spacing:.03em;border:1px solid var(--line);background:var(--panel);color:var(--ink);
+  border-radius:8px;padding:8px 12px;cursor:pointer;min-height:40px}
+.btn:hover{background:var(--sunk)}
+.btn:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.small{min-height:32px;padding:4px 10px;font-size:14px}
+.io{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;padding:10px 12px 12px;border-top:1px solid var(--line)}
+@media (max-width:640px){.io{grid-template-columns:minmax(0,1fr)}}
+.io h4{margin:0 0 6px;font-family:var(--f-display);font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;gap:4px}
+.chip{font-family:var(--f-mono);font-size:11.5px;display:inline-flex;gap:5px;align-items:center;padding:2px 7px;border-radius:999px;background:var(--sunk);color:var(--muted);white-space:nowrap}
+.chip i{width:7px;height:7px;border-radius:50%;background:var(--off);display:inline-block}
+.chip.on{color:var(--ink)} .chip.on i{background:var(--run)}
+
+/* HMI */
+.hmi{padding:14px;display:flex;flex-direction:column;gap:12px}
+.hmi-top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.pill{font-family:var(--f-display);font-weight:600;font-size:13px;text-transform:uppercase;letter-spacing:.06em;padding:3px 10px;border-radius:999px;background:var(--sunk);color:var(--muted)}
+.pill.run{background:color-mix(in srgb,var(--run) 18%,transparent);color:var(--run)}
+.pill.alarm{background:color-mix(in srgb,var(--alarm) 18%,transparent);color:var(--alarm)}
+.pill.wait{background:color-mix(in srgb,var(--wait) 20%,transparent);color:var(--wait)}
+.lamps{display:flex;gap:6px}
+.lamp{width:14px;height:14px;border-radius:50%;background:var(--off);border:1px solid var(--line)}
+.lamp.g.on{background:var(--run)} .lamp.a.on{background:var(--wait)} .lamp.r.on{background:var(--alarm)}
+.weight{background:var(--sunk);border-radius:8px;padding:10px 12px}
+.weight .num{font-family:var(--f-mono);font-variant-numeric:tabular-nums;font-size:44px;font-weight:600;line-height:1.05}
+.weight .num small{font-size:18px;color:var(--muted);margin-left:4px}
+.wbar{position:relative;height:14px;background:var(--panel);border-radius:4px;margin-top:10px;border:1px solid var(--line);overflow:visible}
+.wbar .fill{position:absolute;inset:0 auto 0 0;background:var(--steel);border-radius:3px;width:0}
+.wbar .mk{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--ink)}
+.wbar .mk.cut{background:var(--wait)}
+.wbar .tolband{position:absolute;top:0;bottom:0;background:color-mix(in srgb,var(--run) 25%,transparent)}
+.wlegend{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-top:4px;font-family:var(--f-mono)}
+.msg{border-left:4px solid var(--steel);background:var(--sunk);padding:8px 10px;border-radius:0 6px 6px 0;font-size:15px}
+.msg b{font-family:var(--f-display);font-size:17px;display:block}
+.msg.wait{border-color:var(--wait)} .msg.alarm{border-color:var(--alarm)} .msg.run{border-color:var(--run)}
+.cmd{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.btn.go{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);grid-column:1/-1;min-height:56px;font-size:20px;letter-spacing:.08em}
+.btn.go:hover{filter:brightness(1.08);background:var(--accent)}
+.btn.go.ready{box-shadow:0 0 0 3px color-mix(in srgb,var(--wait) 70%,transparent)}
+.btn.estop{border-color:var(--alarm);color:var(--alarm)}
+.btn.estop[aria-pressed="true"]{background:var(--alarm);color:#fff}
+.params{display:grid;grid-template-columns:1fr auto;gap:6px 10px;align-items:center;font-size:14px}
+.params .calc{grid-column:1/-1;font-size:13px;color:var(--muted)}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;font-size:12.5px;color:var(--muted)}
+.stats div{background:var(--sunk);border-radius:6px;padding:6px 8px}
+.stats b{display:block;font-family:var(--f-mono);font-size:15px;color:var(--ink);font-variant-numeric:tabular-nums}
+.suggest{font-size:13.5px;color:var(--muted);display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.stagelist{list-style:none;margin:0;padding:0;display:grid;gap:2px;font-size:13px}
+.stagelist li{display:grid;grid-template-columns:22px 1fr;gap:6px;padding:3px 6px;border-radius:5px;color:var(--muted)}
+.stagelist li span:first-child{font-family:var(--f-mono);text-align:right}
+.stagelist li.cur{background:color-mix(in srgb,var(--accent) 16%,transparent);color:var(--ink);font-weight:600}
+details.more{border-top:1px solid var(--line);padding-top:8px}
+details.more summary{cursor:pointer;font-family:var(--f-display);font-weight:600;color:var(--muted)}
+.realbox{font-size:13.5px;color:var(--muted);display:flex;flex-direction:column;gap:8px}
+.realbox .row{display:flex;gap:8px;flex-wrap:wrap}
+
+/* ---------- Proceso ---------- */
+.flow{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px;counter-reset:none}
+.step{padding:12px 14px;display:flex;flex-direction:column;gap:6px;border-left:4px solid var(--steel)}
+.step.op{border-left-color:var(--wait)}
+.step .n{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+.step h3{font-size:18px}
+.step .who{font-size:12px;font-family:var(--f-display);font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.step.op .who{color:var(--wait)}
+.step .adv{font-size:13.5px;color:var(--muted)}
+.step .adv code{font-size:12px}
+
+/* ---------- Ideas dispensador ---------- */
+.ideas{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}
+.idea{padding:14px;display:flex;flex-direction:column;gap:8px}
+.idea svg{width:100%;height:auto;background:var(--sunk);border-radius:6px}
+.idea ul{margin:0;padding-left:18px;font-size:14px}
+.idea .rec{font-family:var(--f-display);font-weight:600;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
+
+/* ---------- Tablas ---------- */
+.tables{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,460px),1fr));gap:14px}
+.tbl{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-family:var(--f-display);font-weight:600;font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);background:var(--sunk)}
+td.a{font-family:var(--f-mono);font-size:13px;white-space:nowrap;font-weight:600}
+.note{font-size:14px;color:var(--muted);max-width:72ch}
+.callout{padding:12px 14px;border-left:4px solid var(--alarm);background:var(--panel);border-radius:0 8px 8px 0;font-size:14.5px;max-width:80ch}
+.callout.info{border-left-color:var(--accent)}
+.arch svg{width:100%;height:auto;display:block}
+
+/* ---------- Ladder ---------- */
+.lad-tools{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;margin-bottom:12px;font-size:14px;color:var(--muted)}
+.block{margin-top:22px}
+.block > h3{margin-bottom:4px}
+.block > p{color:var(--muted);font-size:14px;margin-bottom:10px;max-width:72ch}
+.rung{display:grid;grid-template-columns:44px minmax(0,1fr);gap:0 10px;padding:10px 0;border-top:1px solid var(--line)}
+.rung .rn{font-family:var(--f-mono);font-size:13px;font-weight:600;color:var(--muted);padding-top:2px}
+.rung.true .rn{color:var(--run)}
+.rung .rt{font-family:var(--f-display);font-weight:600;font-size:16px}
+.rung .rx{font-size:14px;color:var(--muted);max-width:76ch;margin:2px 0 6px}
+.rung .rsvg{overflow-x:auto;background:var(--panel);border:1px solid var(--line);border-radius:8px}
+.rung .rsvg svg{display:block}
+.rung details{margin-top:6px}
+.rung summary{cursor:pointer;font-size:13px;color:var(--muted)}
+pre{font-family:var(--f-mono);font-size:12.5px;background:var(--sunk);border-radius:8px;padding:10px 12px;overflow-x:auto;margin:6px 0 0;line-height:1.5}
+svg .ct-bar{stroke:var(--ink);stroke-width:2}
+svg .w{stroke:var(--wire);stroke-width:1.5;fill:none}
+svg .rail{stroke:var(--ink);stroke-width:2.5}
+svg .lbl{font-family:var(--f-mono);font-size:11.5px;fill:var(--ink);font-weight:600}
+svg .cmt{font-family:var(--f-body);font-size:10.5px;fill:var(--muted)}
+svg .box{fill:var(--panel);stroke:var(--ink);stroke-width:1.5}
+svg .on .ct-bar{stroke:var(--run);stroke-width:3}
+svg .on .box{stroke:var(--run);stroke-width:2.5;fill:color-mix(in srgb,var(--run) 14%,var(--panel))}
+svg .on .coil{stroke:var(--run);stroke-width:3}
+svg .coil{stroke:var(--ink);stroke-width:2;fill:none}
+
+/* ---------- Pasos ---------- */
+ol.steps{margin:0;padding:0;list-style:none;display:grid;gap:10px;counter-reset:s}
+ol.steps > li{counter-increment:s;display:grid;grid-template-columns:34px minmax(0,1fr);gap:10px;padding:12px 14px}
+ol.steps > li::before{content:counter(s);font-family:var(--f-display);font-weight:700;font-size:18px;width:30px;height:30px;border-radius:50%;
+  display:grid;place-items:center;background:var(--sunk);color:var(--ink)}
+ol.steps h3{font-size:17px;margin-bottom:4px}
+ol.steps p,ol.steps li li{font-size:14.5px}
+ol.steps ul{margin:6px 0 0;padding-left:18px}
+kbd{font-family:var(--f-mono);font-size:12px;border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:0 5px;background:var(--panel)}
+.copyrow{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:8px}
+.toast{font-size:13px;color:var(--run)}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:14px}
+@media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<div class="wrap">
+<header class="top">
+  <div>
+    <div class="tag">Maqueta de tesis · Mitsubishi FX3U-80MT/ES · Arduino + HX711</div>
+    <h1>Envasadora automática de hidróxido de litio</h1>
+    <p class="lede">Simulador del proceso con su HMI, ideas para el dispensador de pallets, conexiones, el ladder completo explicado peldaño por peldaño y la guía para construirlo y probarlo en GX Works2.</p>
+  </div>
+</header>
+
+<nav class="sec" aria-label="Secciones">
+  <a href="#simulador">Simulador y HMI</a>
+  <a href="#proceso">Proceso paso a paso</a>
+  <a href="#dispensador">Dispensador</a>
+  <a href="#conexiones">Conexiones y E/S</a>
+  <a href="#ladder">Ladder</a>
+  <a href="#probar">Construir y probar</a>
+  <a href="#arduino">Arduino y HMI real</a>
+</nav>
+
+<!-- ================= SIMULADOR ================= -->
+<section id="simulador" style="margin-top:0">
+  <div class="head">
+    <h2>Simulador y HMI</h2>
+    <p>Presiona <b>MARCHA</b> y sigue las instrucciones de la pantalla. La simulación ejecuta el mismo ladder de esta página, peldaño por peldaño, así que lo que ves aquí es lo que hará el PLC.</p>
+  </div>
+  <div class="sim">
+    <div class="card">
+      <div class="mimic">
+        <div class="mimic-bar">
+          <div class="ctrls">
+            <label for="spd">Velocidad
+              <select id="spd"><option value="1">×1</option><option value="2" selected>×2</option><option value="4">×4</option></select></label>
+            <label for="autoOp"><input type="checkbox" id="autoOp"> Operador automático (demo)</label>
+            <label for="autoFork"><input type="checkbox" id="autoFork" checked> Grúa automática</label>
+          </div>
+          <div class="ctrls">
+            <button class="btn small" id="btnFork" type="button">Retirar con grúa</button>
+            <button class="btn small" id="btnRefill" type="button">Recargar almacén</button>
+            <button class="btn small" id="btnRestart" type="button">Reiniciar simulación</button>
+          </div>
+        </div>
+        <div class="svgbox"><svg id="mimicSvg" viewBox="0 0 900 330" role="img" aria-label="Esquema animado de la línea: almacén de pallets, correa, silo de llenado, vibrador y zona de retiro"></svg></div>
+      </div>
+      <div class="io">
+        <div><h4>Entradas del PLC (X)</h4><div class="chips" id="xChips"></div></div>
+        <div><h4>Salidas del PLC (Y)</h4><div class="chips" id="yChips"></div></div>
+      </div>
+    </div>
+
+    <aside class="card hmi" aria-label="Pantalla HMI">
+      <div class="hmi-top">
+        <span class="pill" id="modePill">Detenido</span>
+        <div class="lamps" title="Baliza: verde ciclo, ámbar operador, roja alarma"><span class="lamp g" id="lampG"></span><span class="lamp a" id="lampA"></span><span class="lamp r" id="lampR"></span></div>
+      </div>
+      <div class="msg" id="msg"><b id="msgT">Listo</b><span id="msgB">Presione MARCHA para iniciar el ciclo automático.</span></div>
+      <div class="weight">
+        <div class="tag">Peso en el saco</div>
+        <div class="num" id="wNum">0,0<small>g</small></div>
+        <div class="wbar" id="wbar"><div class="tolband" id="tolBand"></div><div class="fill" id="wFill"></div><div class="mk cut" id="mkCut" title="Punto de corte"></div><div class="mk" id="mkSp" title="Meta"></div></div>
+        <div class="wlegend"><span>0</span><span id="legCut">corte 450</span><span id="legSp">meta 500</span></div>
+      </div>
+      <div class="cmd">
+        <button class="btn go" id="bPartir" type="button">PARTIR</button>
+        <button class="btn" id="bMarcha" type="button">MARCHA</button>
+        <button class="btn" id="bParo" type="button">PARO</button>
+        <button class="btn" id="bReset" type="button">RESET ALARMA</button>
+        <button class="btn estop" id="bEstop" type="button" aria-pressed="false">EMERGENCIA</button>
+      </div>
+      <div class="params">
+        <label for="pSp">Meta (g)</label><input type="number" id="pSp" value="500" min="50" max="2000" step="10">
+        <label for="pCo">Compensación de cierre (g)</label><input type="number" id="pCo" value="50" min="0" max="300" step="1">
+        <label for="pTl">Tolerancia ± (g)</label><input type="number" id="pTl" value="15" min="1" max="100" step="1">
+        <div class="calc" id="calcCut">La válvula cierra a los 450 g; el producto en caída completa los 500 g.</div>
+      </div>
+      <div class="stats">
+        <div>Sacos<b id="sCount">0</b></div>
+        <div>Último<b id="sLast">–</b></div>
+        <div>Caída medida<b id="sFall">–</b></div>
+      </div>
+      <div class="suggest" id="suggest" hidden><span id="suggestT"></span><button class="btn small" id="bApply" type="button">Aplicar</button></div>
+      <button class="btn small" id="bFix" type="button" hidden>Simular corrección manual del saco</button>
+      <details class="more" open>
+        <summary>Etapas del ciclo</summary>
+        <ol class="stagelist" id="stageList"></ol>
+      </details>
+      <details class="more" id="realDetails">
+        <summary>Conectar a la maqueta real</summary>
+        <div class="realbox">
+          <p>Con el Arduino conectado por USB, esta misma pantalla muestra el peso real y la etapa del PLC, y sus botones mandan las órdenes al PLC.</p>
+          <div class="row">
+            <button class="btn small" id="bConnect" type="button">Conectar Arduino</button>
+            <button class="btn small" id="bCal0" type="button" disabled>Calibrar: celda vacía</button>
+            <button class="btn small" id="bCal" type="button" disabled>Calibrar con 500 g</button>
+          </div>
+          <p id="realMsg">Para usarla, descarga esta página (te la envié como archivo) y ábrela en Chrome o Edge en tu computador.</p>
+        </div>
+      </details>
+    </aside>
+  </div>
+</section>
+
+<!-- ================= PROCESO ================= -->
+<section id="proceso">
+  <div class="head">
+    <h2>El proceso paso a paso</h2>
+    <p>Doce etapas, de la 0 a la 11. Las de borde ámbar esperan al operador; el resto avanza solo con sensores y tiempos. En el PLC cada etapa es una marca: M0 es la etapa 0, M1 la etapa 1, y así.</p>
+  </div>
+  <div class="flow" id="flow"></div>
+  <p class="note" style="margin-top:12px">La válvula se cierra antes de la meta porque el producto que ya salió del silo sigue cayendo mientras la compuerta cierra. Esa cantidad es la <b>compensación</b>: si la meta es 500 g y caen unos 50 g después del cierre, la válvula se cierra a los 450 g. La HMI mide la caída real de cada saco y sugiere el ajuste.</p>
+</section>
+
+<!-- ================= DISPENSADOR ================= -->
+<section id="dispensador">
+  <div class="head">
+    <h2>Ideas para el dispensador de pallets</h2>
+    <p>Las tres usan un almacén vertical (torre) o una rampa, y entregan un pallet por ciclo. El ladder de esta página está hecho para la idea A; abajo de cada idea dice qué cambia si eligen otra.</p>
+  </div>
+  <div class="ideas">
+    <article class="card idea">
+      <div class="rec">Recomendada</div>
+      <h3>A. Torre + empujador con actuador lineal</h3>
+      <svg viewBox="0 0 300 150" role="img" aria-label="Torre de pallets con actuador lineal que empuja el pallet de abajo hacia la correa">
+        <rect x="70" y="20" width="6" height="104" fill="var(--steel)"/><rect x="150" y="20" width="6" height="88" fill="var(--steel)"/>
+        <rect x="80" y="40" width="66" height="12" fill="var(--product)" stroke="var(--product-edge)"/><rect x="80" y="56" width="66" height="12" fill="var(--product)" stroke="var(--product-edge)"/>
+        <rect x="80" y="72" width="66" height="12" fill="var(--product)" stroke="var(--product-edge)"/><rect x="80" y="88" width="66" height="12" fill="var(--product)" stroke="var(--product-edge)"/>
+        <rect x="80" y="110" width="66" height="12" fill="var(--product)" stroke="var(--ink)" stroke-width="1.5"/>
+        <rect x="10" y="108" width="44" height="16" rx="3" fill="var(--panel)" stroke="var(--ink)"/><rect x="54" y="113" width="26" height="6" fill="var(--ink)"/>
+        <text x="32" y="140" text-anchor="middle" font-size="10" fill="var(--muted)" font-family="var(--f-body)">actuador</text>
+        <path d="M86 116 h50" stroke="var(--accent)" stroke-width="2" marker-end="url(#ar1)"/>
+        <rect x="160" y="124" width="132" height="8" fill="var(--steel)"/>
+        <text x="226" y="146" text-anchor="middle" font-size="10" fill="var(--muted)" font-family="var(--f-body)">correa</text>
+        <text x="113" y="14" text-anchor="middle" font-size="10" fill="var(--muted)" font-family="var(--f-body)">torre de pallets</text>
+        <defs><marker id="ar1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10z" fill="var(--accent)"/></marker></defs>
+      </svg>
+      <ul>
+        <li>Los pallets se apilan en una torre con guías. La abertura de abajo deja pasar solo un pallet: alto del pallet + 2 mm.</li>
+        <li>Un actuador lineal de 24 V y 100 mm de carrera empuja el pallet de abajo hasta la correa; los de arriba bajan solos.</li>
+        <li>Dos finales de carrera (adelante X4, atrás X5) y un sensor que avisa si quedan pallets (X3).</li>
+        <li>Para invertir el giro se usan dos relés: Y1 avanza, Y2 retrocede. El ladder impide que se activen juntos.</li>
+      </ul>
+    </article>
+    <article class="card idea">
+      <div class="rec" style="color:var(--muted)">La más barata</div>
+      <h3>B. Torre + biela-manivela con motorreductor</h3>
+      <svg viewBox="0 0 300 150" role="img" aria-label="Motorreductor con manivela y biela que empuja el pallet de abajo">
+        <rect x="150" y="20" width="6" height="88" fill="var(--steel)"/><rect x="226" y="20" width="6" height="104" fill="var(--steel)"/>
+        <rect x="158" y="72" width="66" height="12" fill="var(--product)" stroke="var(--product-edge)"/><rect x="158" y="88" width="66" height="12" fill="var(--product)" stroke="var(--product-edge)"/>
+        <rect x="158" y="110" width="66" height="12" fill="var(--product)" stroke="var(--ink)" stroke-width="1.5"/>
+        <circle cx="50" cy="104" r="26" fill="none" stroke="var(--ink)"/><circle cx="50" cy="104" r="4" fill="var(--ink)"/>
+        <line x1="50" y1="104" x2="68" y2="86" stroke="var(--ink)" stroke-width="3"/>
+        <line x1="68" y1="86" x2="150" y2="116" stroke="var(--ink)" stroke-width="3"/>
+        <rect x="40" y="68" width="22" height="8" fill="var(--wait)"/>
+        <text x="50" y="146" text-anchor="middle" font-size="10" fill="var(--muted)" font-family="var(--f-body)">motorreductor + leva</text>
+        <rect x="236" y="124" width="60" height="8" fill="var(--steel)"/>
+        <text x="190" y="14" text-anchor="middle" font-size="10" fill="var(--muted)" font-family="var(--f-body)">torre</text>
+      </svg>
+      <ul>
+        <li>Un motorreductor de 24 V con una manivela: cada vuelta completa empuja un pallet y vuelve sola.</li>
+        <li>Un solo relé y un final de carrera de leva que marca la posición de reposo.</li>
+        <li>En el ladder: Y1 se enciende en la etapa 1 hasta que la leva sale y vuelve a pisar el final de carrera (usar <code>LDP X5</code>). Y2 no se usa.</li>
+      </ul>
+    </article>
+    <article class="card idea">
+      <div class="rec" style="color:var(--muted)">Sin motor de empuje</div>
+      <h3>C. Rampa por gravedad + compuerta de escape</h3>
+      <svg viewBox="0 0 300 150" role="img" aria-label="Rampa inclinada con pallets y una compuerta que deja pasar uno a la vez">
+        <line x1="10" y1="40" x2="170" y2="112" stroke="var(--steel)" stroke-width="5"/>
+        <rect x="30" y="34" width="34" height="12" fill="var(--product)" stroke="var(--product-edge)" transform="rotate(24 47 40)"/>
+        <rect x="70" y="52" width="34" height="12" fill="var(--product)" stroke="var(--product-edge)" transform="rotate(24 87 58)"/>
+        <rect x="110" y="70" width="34" height="12" fill="var(--product)" stroke="var(--product-edge)" transform="rotate(24 127 76)"/>
+        <rect x="152" y="72" width="6" height="30" fill="var(--wait)"/>
+        <text x="155" y="64" text-anchor="middle" font-size="10" fill="var(--muted)" font-family="var(--f-body)">compuerta</text>
+        <rect x="176" y="118" width="116" height="8" fill="var(--steel)"/>
+        <text x="234" y="142" text-anchor="middle" font-size="10" fill="var(--muted)" font-family="var(--f-body)">correa</text>
+      </svg>
+      <ul>
+        <li>Los pallets bajan solos por una rampa de unos 15° y los detiene una compuerta.</li>
+        <li>Un solenoide o un servo levanta la compuerta un instante y pasa un pallet.</li>
+        <li>Necesita más largo de maqueta y pallets que deslicen bien (MDF lijado o acrílico).</li>
+      </ul>
+    </article>
+  </div>
+</section>
+
+<!-- ================= CONEXIONES ================= -->
+<section id="conexiones">
+  <div class="head">
+    <h2>Conexiones y lista de entradas y salidas</h2>
+    <p>El PLC manda la secuencia. El Arduino pesa, decide cuándo cortar y hace de puente con la HMI del computador. Entre el Arduino y el PLC solo van señales on/off, por relés y optoacopladores, para no mezclar 5 V con 24 V.</p>
+  </div>
+  <div class="card arch" style="padding:12px">
+    <div class="svgbox"><svg viewBox="0 0 900 300" role="img" aria-label="Arquitectura: computador con HMI conectado por USB al Arduino; el Arduino lee la celda de carga y se conecta al PLC con relés y optoacopladores; el PLC maneja sensores y actuadores">
+      <defs><marker id="arA" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="var(--steel)"/></marker></defs>
+      <g font-family="var(--f-body)" font-size="13" fill="var(--ink)">
+        <rect x="20" y="30" width="190" height="96" rx="8" fill="var(--panel)" stroke="var(--steel)"/>
+        <text x="115" y="56" text-anchor="middle" font-weight="600" font-family="var(--f-display)" font-size="16">Computador</text>
+        <text x="115" y="78" text-anchor="middle" fill="var(--muted)">HMI en Chrome (esta página)</text>
+        <text x="115" y="98" text-anchor="middle" fill="var(--muted)">GX Works2 para programar</text>
+        <rect x="330" y="30" width="210" height="96" rx="8" fill="var(--panel)" stroke="var(--accent)" stroke-width="2"/>
+        <text x="435" y="56" text-anchor="middle" font-weight="600" font-family="var(--f-display)" font-size="16">Arduino Uno</text>
+        <text x="435" y="78" text-anchor="middle" fill="var(--muted)">Peso, corte y tolerancia</text>
+        <text x="435" y="98" text-anchor="middle" fill="var(--muted)">Puente HMI ↔ PLC</text>
+        <rect x="660" y="30" width="220" height="96" rx="8" fill="var(--panel)" stroke="var(--steel)"/>
+        <text x="770" y="56" text-anchor="middle" font-weight="600" font-family="var(--f-display)" font-size="16">PLC FX3U-80MT/ES</text>
+        <text x="770" y="78" text-anchor="middle" fill="var(--muted)">Secuencia, enclavamientos</text>
+        <text x="770" y="98" text-anchor="middle" fill="var(--muted)">alarmas y salidas</text>
+        <rect x="330" y="200" width="210" height="72" rx="8" fill="var(--panel)" stroke="var(--steel)"/>
+        <text x="435" y="226" text-anchor="middle" font-weight="600" font-family="var(--f-display)" font-size="16">Celda 2 kg + HX711</text>
+        <text x="435" y="248" text-anchor="middle" fill="var(--muted)">A0 = DT · A1 = SCK</text>
+        <rect x="660" y="200" width="220" height="72" rx="8" fill="var(--panel)" stroke="var(--steel)"/>
+        <text x="770" y="226" text-anchor="middle" font-weight="600" font-family="var(--f-display)" font-size="16">Campo (24 V DC)</text>
+        <text x="770" y="248" text-anchor="middle" fill="var(--muted)">Sensores, correa, válvula, vibrador</text>
+        <rect x="20" y="200" width="190" height="72" rx="8" fill="var(--panel)" stroke="var(--steel)"/>
+        <text x="115" y="226" text-anchor="middle" font-weight="600" font-family="var(--f-display)" font-size="16">Fuente Omron 24 V</text>
+        <text x="115" y="248" text-anchor="middle" fill="var(--muted)">Sensores y relés</text>
+      </g>
+      <g stroke="var(--steel)" stroke-width="1.5" fill="none">
+        <path d="M210 78 H328" marker-end="url(#arA)" marker-start="url(#arA)"/>
+        <path d="M540 66 H658" marker-end="url(#arA)"/>
+        <path d="M658 92 H542" marker-end="url(#arA)"/>
+        <path d="M435 198 V128" marker-end="url(#arA)"/>
+        <path d="M770 128 V198" marker-end="url(#arA)" marker-start="url(#arA)"/>
+        <path d="M210 236 H300 V160 H770 V198" stroke-dasharray="4 4"/>
+        <path d="M115 128 V160 H300" stroke-dasharray="4 4"/>
+      </g>
+      <g font-family="var(--f-body)" font-size="11.5" fill="var(--muted)">
+        <text x="269" y="70" text-anchor="middle">USB</text>
+        <text x="599" y="58" text-anchor="middle">6 relés → X20–X25</text>
+        <text x="599" y="110" text-anchor="middle">Y10, Y11, Y20–Y23 → opto</text>
+        <text x="132" y="150">cable de programación</text>
+        <text x="306" y="252">24 V</text>
+      </g>
+    </svg></div>
+  </div>
+
+  <div class="tables" style="margin-top:14px">
+    <div class="card tbl"><table>
+      <thead><tr><th>Entrada</th><th>Señal</th><th>Dispositivo</th></tr></thead>
+      <tbody id="tbX"></tbody></table></div>
+    <div class="card tbl"><table>
+      <thead><tr><th>Salida</th><th>Señal</th><th>Conectada a</th></tr></thead>
+      <tbody id="tbY"></tbody></table></div>
+  </div>
+  <div class="tables" style="margin-top:14px">
+    <div class="card tbl"><table>
+      <thead><tr><th>Interno</th><th>Uso</th></tr></thead>
+      <tbody id="tbM"></tbody></table></div>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div class="callout"><b>Cableado de entradas.</b> Si los sensores son PNP (por ejemplo E3F-DS30<b>P1</b>), conecten el borne <code>S/S</code> al <b>0 V</b>. Si son NPN (E3F-DS30<b>C4</b>), conecten <code>S/S</code> a <b>+24 V</b>. Todos los sensores deben ser del mismo tipo. Los contactos de relé del Arduino, pulsadores y finales de carrera sirven en ambos casos.</div>
+      <div class="callout"><b>Salidas.</b> Las del FX3U-80MT/ES son a transistor, tipo sink y de máximo 0,5 A. Los motores, la válvula y el vibrador van siempre a través de un relé de interfaz de 24 V con diodo. Y10, Y11 e Y20 a Y23 van solo al optoacoplador, sin otra carga.</div>
+      <div class="callout"><b>Emergencia.</b> La seta debe cortar por cable los 24 V de los relés de los motores, la válvula y el vibrador. La entrada X0 solo le avisa al programa.</div>
+      <div><div class="tag">Copiar comentarios para GX Works2</div>
+      <div class="copyrow" id="cmtBtns"><button class="btn small" type="button" data-g="X">X desde X000</button><button class="btn small" type="button" data-g="Y">Y desde Y000</button><button class="btn small" type="button" data-g="M0">M desde M0</button><button class="btn small" type="button" data-g="M100">M desde M100</button><button class="btn small" type="button" data-g="T">T desde T0</button><button class="btn small" type="button" data-g="D">D desde D100</button><span class="toast" id="tCmt" role="status"></span></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= LADDER ================= -->
+<section id="ladder">
+  <div class="head">
+    <h2>El ladder, peldaño por peldaño</h2>
+    <p>51 peldaños en cinco bloques. Cada etapa del proceso es una marca M que se enciende con SET y apaga la anterior con RST; las salidas se escriben al final, una sola vez cada una. Mientras corre el simulador, los contactos y bobinas activos se pintan en verde.</p>
+  </div>
+  <div class="lad-tools">
+    <span><svg width="58" height="22" aria-hidden="true"><line x1="0" y1="11" x2="22" y2="11" class="w"/><line x1="22" y1="3" x2="22" y2="19" class="ct-bar"/><line x1="34" y1="3" x2="34" y2="19" class="ct-bar"/><line x1="34" y1="11" x2="58" y2="11" class="w"/></svg> contacto NA (LD / AND / OR)</span>
+    <span><svg width="58" height="22" aria-hidden="true"><line x1="0" y1="11" x2="22" y2="11" class="w"/><line x1="22" y1="3" x2="22" y2="19" class="ct-bar"/><line x1="34" y1="3" x2="34" y2="19" class="ct-bar"/><line x1="20" y1="19" x2="36" y2="3" class="ct-bar"/><line x1="34" y1="11" x2="58" y2="11" class="w"/></svg> contacto NC (LDI / ANI / ORI)</span>
+    <button class="btn small" id="bCopyIL" type="button">Copiar listado completo (para revisar o imprimir)</button><span class="toast" id="tIL" role="status"></span>
+  </div>
+  <div id="ladderBlocks"></div>
+</section>
+
+<!-- ================= PROBAR ================= -->
+<section id="probar">
+  <div class="head">
+    <h2>Construir y probar en GX Works2</h2>
+    <p>Primero en el simulador del computador, sin cables. Después en el PLC real, entrada por entrada. Así, si algo falla, saben si es el programa o el cableado.</p>
+  </div>
+  <h3 style="margin-bottom:10px">Parte 1: escribir el programa</h3>
+  <ol class="steps">
+    <li class="card"><div><h3>Crear el proyecto</h3><p><b>Project → New</b>. Series: <b>FXCPU</b>. Type: <b>FX3U/FX3UC</b>. Project Type: <b>Simple Project</b>. Language: <b>Ladder</b>. Guárdenlo con un nombre como <code>envasadora_lioh</code>.</p></div></li>
+    <li class="card"><div><h3>Cargar los comentarios de los dispositivos</h3><p>En el árbol de la izquierda abran <b>Global Device Comment</b>. En “Device Name” escriban <code>X000</code>, copien la lista con el botón “X desde X000” de la sección de conexiones, hagan clic en la celda de comentario de X000 y peguen. Repitan con Y000, M0, M100, T0 y D100. Las filas vacías son direcciones que no se usan. Si su versión no pega varias filas, escríbanlos a mano: son pocos. Con los comentarios, el ladder se lee solo.</p></div></li>
+    <li class="card"><div><h3>Escribir cada peldaño</h3><p>Abran <b>Program Setting → MAIN</b>. Pónganse al inicio de la fila, escriban la instrucción tal como aparece en el listado de cada peldaño, por ejemplo <code>LD X2</code>, y presionen <kbd>Enter</kbd>: GX Works2 dibuja el contacto y avanza el cursor. Para un OR, bajen el cursor a la fila de abajo, bajo el contacto, y escriban <code>OR X21</code>. Las salidas (<code>SET M100</code>, <code>OUT Y0</code>) se escriben al final de la fila y quedan pegadas a la barra derecha.</p>
+      <ul>
+        <li>También pueden usar las teclas: <kbd>F5</kbd> contacto NA, <kbd>F6</kbd> contacto NC, <kbd>Shift</kbd>+<kbd>F5</kbd> contacto NA en paralelo, <kbd>F7</kbd> bobina, <kbd>F8</kbd> instrucción (SET, RST, MOV, ZRST, PLS).</li>
+        <li>Un temporizador se escribe como bobina con su tiempo: <code>OUT T0 K50</code> = 5,0 s (base de 100 ms).</li>
+        <li>Varias salidas del mismo peldaño (SET M2 y RST M1) se escriben una debajo de otra; GX Works2 las pone en paralelo.</li>
+      </ul></div></li>
+    <li class="card"><div><h3>Convertir y revisar</h3><p>Cada cierto número de peldaños presionen <kbd>F4</kbd> (Convert). Los peldaños grises pasan a blancos cuando quedaron bien. Al final usen <b>Tool → Check Program</b>: avisa si una bobina se repite (por ejemplo Y0 escrito dos veces), un error típico.</p></div></li>
+  </ol>
+
+  <h3 style="margin:22px 0 10px">Parte 2: probar en el simulador de GX Works2</h3>
+  <ol class="steps">
+    <li class="card"><div><h3>Iniciar la simulación</h3><p><b>Debug → Start/Stop Simulation</b>. Se abre GX Simulator2, el programa se carga solo y queda en RUN. Activen el monitoreo con <b>Online → Monitor → Start Monitoring</b> (<kbd>F3</kbd>): los contactos activos se ven en azul.</p></div></li>
+    <li class="card"><div><h3>Simular lo que está cableado en NC</h3><p>En la máquina real, la emergencia (X0) y el paro (X1) entregan 1 cuando nadie los toca. En el simulador valen 0, así que lo primero es forzarlos a ON: <b>Debug → Modify Value</b>, escriban <code>X0</code>, elijan <b>ON</b> y presionen <b>Set</b>. Repitan con <code>X1</code>, <code>X5</code> (empujador atrás) y <code>X3</code> (hay pallets).</p></div></li>
+    <li class="card"><div><h3>Recorrer el ciclo completo</h3><p>Sigan la tabla de abajo de arriba hacia abajo. “Pulso” quiere decir poner en ON y luego en OFF. En cada fila revisen que la etapa y las salidas sean las que dice la tabla. Si una fila no da el resultado, el error está en el peldaño de esa transición.</p></div></li>
+    <li class="card"><div><h3>Probar las fallas</h3><p>Con la etapa 5 activa (válvula abierta), no activen X24 y esperen 60 s: debe encenderse M101 y la luz roja Y7, y cerrarse Y3. Un pulso en X12 la resetea y el llenado continúa. Pongan X0 en OFF en cualquier momento: todo se apaga y la secuencia vuelve a la etapa 0.</p></div></li>
+  </ol>
+  <div class="card tbl" style="margin-top:12px"><table>
+    <thead><tr><th>#</th><th>Fuerce en el simulador</th><th>Debe pasar</th><th>Etapa</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>X0, X1, X3, X5 en ON</td><td>Nada se mueve todavía. M0 encendida.</td><td>0</td></tr>
+      <tr><td>2</td><td>Pulso X21 (MARCHA de la HMI)</td><td>M100 y Y5 (verde) en ON. Pasa a etapa 1 y enciende Y1 (empujador avanza).</td><td>1</td></tr>
+      <tr><td>3</td><td>X5 OFF, X4 ON</td><td>Y1 OFF. Y0 (correa) ON y Y2 (empujador retrocede) ON.</td><td>2</td></tr>
+      <tr><td>4</td><td>X4 OFF, X5 ON, luego X6 ON</td><td>Y2 OFF. Y0 OFF. Y6 (ámbar) ON: “coloque el saco”.</td><td>3</td></tr>
+      <tr><td>5</td><td>Pulso X20 (PARTIR)</td><td>Y10 (tarar) ON por 1,5 s. Después Y3 (válvula) ON.</td><td>4 → 5</td></tr>
+      <tr><td>6</td><td>X24 ON (peso de corte)</td><td>Y3 OFF. Tras 2 s pasa a la etapa 7 y Y6 ON: “retire los ganchos”.</td><td>6 → 7</td></tr>
+      <tr><td>7</td><td>X24 OFF, pulso X20</td><td>Y0 ON. Pongan X6 OFF (el pallet salió del llenado).</td><td>8</td></tr>
+      <tr><td>8</td><td>X7 ON</td><td>Y0 OFF. Y4 (vibrador) ON 5 s. Después Y0 ON.</td><td>9 → 10</td></tr>
+      <tr><td>9</td><td>X7 OFF, X10 ON</td><td>Y0 OFF. Espera la grúa.</td><td>11</td></tr>
+      <tr><td>10</td><td>X10 OFF</td><td>Vuelve a la etapa 0 y, con X3 en ON, parte otro ciclo (Y1 ON).</td><td>0 → 1</td></tr>
+    </tbody></table></div>
+  <p class="note" style="margin-top:8px">Mientras prueban, miren D100 con <b>Online → Monitor → Device/Buffer Memory Batch</b>: muestra el número de la etapa activa, el mismo que ve la HMI.</p>
+
+  <h3 style="margin:22px 0 10px">Parte 3: pasarlo al PLC real</h3>
+  <ol class="steps">
+    <li class="card"><div><h3>Conectar el cable</h3><p>Conecten el cable USB de programación y busquen su puerto COM en el Administrador de dispositivos de Windows. En GX Works2: <b>Connection Destination → Serial USB</b>, elijan ese COM y presionen <b>Connection Test</b>.</p></div></li>
+    <li class="card"><div><h3>Escribir el programa</h3><p>Con el selector del PLC en STOP: <b>Online → Write to PLC</b>, marquen Program y Device Comment, y <b>Execute</b>. Pasen el selector a RUN.</p></div></li>
+    <li class="card"><div><h3>Probar las entradas sin motores</h3><p>Dejen los relés de los motores sin 24 V. Activen cada sensor y pulsador con la mano y miren que se encienda el LED de esa entrada en el PLC y el contacto en GX Works2 (monitor <kbd>F3</kbd>). Así confirman el cableado antes de que algo se mueva.</p></div></li>
+    <li class="card"><div><h3>Probar con movimiento</h3><p>Energicen los relés, conecten el Arduino y abran la HMI. Hagan un ciclo a velocidad normal con un saco vacío y otro con producto. Anoten el peso final de 5 sacos y ajusten la compensación con la sugerencia de la HMI.</p></div></li>
+  </ol>
+</section>
+
+<!-- ================= ARDUINO ================= -->
+<section id="arduino">
+  <div class="head">
+    <h2>Arduino y HMI real</h2>
+    <p>El Arduino lee la celda con el HX711, le manda el peso a la HMI por USB y activa los relés hacia el PLC. Las señales del PLC (tarar, ciclo activo y número de etapa) le llegan por optoacopladores.</p>
+  </div>
+  <div class="grid2">
+    <div class="card tbl"><table>
+      <thead><tr><th>Pin Arduino</th><th>Conectado a</th></tr></thead>
+      <tbody>
+        <tr><td class="a">A0, A1</td><td>HX711: DT y SCK (VCC a 5 V, GND a GND)</td></tr>
+        <tr><td class="a">D2 a D7</td><td>Módulo de 8 relés de 5 V. El contacto NA de cada relé va a X20 a X25 del PLC.</td></tr>
+        <tr><td class="a">D8</td><td>Optoacoplador ← Y10 tarar</td></tr>
+        <tr><td class="a">D9 a D12</td><td>Optoacopladores ← Y20 a Y23, número de etapa en binario</td></tr>
+        <tr><td class="a">A2</td><td>Optoacoplador ← Y11 ciclo activo</td></tr>
+        <tr><td class="a">USB</td><td>Computador con la HMI. También alimenta el Arduino.</td></tr>
+      </tbody></table></div>
+    <ol class="steps">
+      <li class="card"><div><h3>Instalar la librería</h3><p>En el IDE de Arduino: <b>Herramientas → Administrar bibliotecas</b>, busquen <b>HX711</b> e instalen la de <b>Bogdan Necula</b>.</p></div></li>
+      <li class="card"><div><h3>Cargar el programa</h3><p>Abran <code>pesaje_envasadora.ino</code> (te lo envié como archivo), elijan la placa y el puerto, y súbanlo.</p></div></li>
+      <li class="card"><div><h3>Calibrar</h3><p>Con la celda vacía presionen “Calibrar: celda vacía” en la HMI. Pongan un peso conocido de 500 g y presionen “Calibrar con 500 g”. El factor queda guardado en la EEPROM.</p></div></li>
+    </ol>
+  </div>
+  <div class="callout info" style="margin-top:14px"><b>Relés.</b> Casi todos los módulos de relés baratos se activan con nivel bajo. El programa ya viene así. Si al encender el Arduino los relés quedan activados, cambien <code>RELE_ON</code> a <code>HIGH</code>. Alimenten la bobina de los relés (JD-VCC) con 5 V aparte, por ejemplo con un reductor LM2596 desde los 24 V: el USB no alcanza para varios relés a la vez.</div>
+  <details class="card" style="margin-top:14px;padding:12px 14px">
+    <summary style="cursor:pointer;font-family:var(--f-display);font-weight:600">Ver el programa del Arduino</summary>
+    <div class="copyrow"><button class="btn small" id="bCopyIno" type="button">Copiar programa</button><span class="toast" id="tIno" role="status"></span></div>
+    <pre id="inoCode">/*
+  Envasadora LiOH (maqueta) - Pesaje y enlace HMI &lt;-&gt; PLC
+  Placa: Arduino Uno o Nano
+  Libreria: &quot;HX711 Arduino Library&quot; de Bogdan Necula (Gestor de librerias)
+
+  Que hace:
+   - Lee la celda de carga con el HX711 y calcula el peso en gramos.
+   - Envia el peso y la etapa del PLC a la HMI (computador) por USB, 10 veces por segundo.
+   - Recibe los botones de la HMI (PARTIR, MARCHA, PARO, RESET) y los pasa al PLC con reles.
+   - Avisa al PLC con un rele cuando el peso llega al punto de corte (meta - compensacion).
+   - Avisa al PLC con otro rele si el peso final queda fuera de tolerancia.
+   - Hace la tara cuando el PLC activa la salida Y10.
+
+  Conexiones (resumen):
+   HX711:  DT -&gt; A0, SCK -&gt; A1, VCC -&gt; 5V, GND -&gt; GND
+   Reles hacia el PLC (modulo de reles 5 V, contacto NA en serie con la entrada X):
+     D2 -&gt; X20 PARTIR   D3 -&gt; X21 MARCHA   D4 -&gt; X22 PARO
+     D5 -&gt; X23 RESET    D6 -&gt; X24 PESO DE CORTE   D7 -&gt; X25 FUERA DE TOLERANCIA
+   Senales desde el PLC (modulo optoacoplador PC817, salida baja = activo):
+     Y10 TARAR -&gt; D8    Y20 -&gt; D9   Y21 -&gt; D10   Y22 -&gt; D11   Y23 -&gt; D12 (codigo de etapa)
+     Y11 CICLO ACTIVO -&gt; A2
+
+  Comandos por el monitor serie (115200 baudios, fin de linea &quot;Nueva linea&quot;):
+   P  = PARTIR      M = MARCHA      S = PARO      R = RESET
+   SP 500 = meta en gramos         CO 50 = compensacion (corte anticipado) en gramos
+   TL 15  = tolerancia +/- gramos  Z = poner en cero (sin saco)
+   CAL0   = paso 1 de calibracion (celda vacia)
+   CAL 500 = paso 2 de calibracion (con un peso conocido de 500 g encima)
+*/
+
+#include &lt;HX711.h&gt;
+#include &lt;EEPROM.h&gt;
+
+// ---------- Pines ----------
+const uint8_t PIN_DT  = A0;
+const uint8_t PIN_SCK = A1;
+
+const uint8_t R_PARTIR = 2;
+const uint8_t R_MARCHA = 3;
+const uint8_t R_PARO   = 4;
+const uint8_t R_RESET  = 5;
+const uint8_t R_CORTE  = 6;
+const uint8_t R_TOL    = 7;
+
+const uint8_t IN_TARA = 8;
+const uint8_t IN_B0   = 9;
+const uint8_t IN_B1   = 10;
+const uint8_t IN_B2   = 11;
+const uint8_t IN_B3   = 12;
+const uint8_t IN_RUN  = A2;
+
+// La mayoria de los modulos de reles chinos se activan con nivel BAJO.
+// Si tu modulo se activa con nivel ALTO, cambia esto a HIGH.
+const uint8_t RELE_ON  = LOW;
+const uint8_t RELE_OFF = (RELE_ON == LOW) ? HIGH : LOW;
+
+const unsigned long PULSO_MS = 300;   // duracion del pulso de los botones de la HMI
+
+// ---------- Parametros guardados en EEPROM ----------
+struct Config {
+  uint16_t marca;      // 0xA5A5 = configuracion valida
+  float factor;        // factor de calibracion del HX711
+  int16_t meta;        // gramos
+  int16_t comp;        // gramos de compensacion
+  int16_t tol;         // +/- gramos
+};
+Config cfg;
+
+HX711 balanza;
+float peso = 0;               // peso filtrado en gramos
+bool pesoValido = false;
+
+// pulsos no bloqueantes
+unsigned long finPulso[8] = {0};
+
+// lectura de etapa con filtro
+uint8_t etapa = 0, etapaLeida = 0, etapaPrevia = 0;
+uint8_t repeticiones = 0;
+bool cicloActivo = false;
+bool taraPrevia = false;
+
+// registro del ultimo saco
+float pesoEnCorte = 0;
+float pesoFinal = 0;
+
+unsigned long ultimoEnvio = 0;
+String linea = &quot;&quot;;
+
+void guardarConfig() { EEPROM.put(0, cfg); }
+
+void cargarConfig() {
+  EEPROM.get(0, cfg);
+  if (cfg.marca != 0xA5A5 || isnan(cfg.factor) || cfg.factor == 0) {
+    cfg.marca = 0xA5A5;
+    cfg.factor = 420.0;   // valor inicial aproximado; calibrar con CAL0 y CAL 500
+    cfg.meta = 500;
+    cfg.comp = 50;
+    cfg.tol = 15;
+    guardarConfig();
+  }
+}
+
+void pulsar(uint8_t pin) {
+  digitalWrite(pin, RELE_ON);
+  finPulso[pin - 2] = millis() + PULSO_MS;
+}
+
+void atenderPulsos() {
+  for (uint8_t pin = R_PARTIR; pin &lt;= R_RESET; pin++) {
+    if (finPulso[pin - 2] &amp;&amp; (long)(millis() - finPulso[pin - 2]) &gt;= 0) {
+      digitalWrite(pin, RELE_OFF);
+      finPulso[pin - 2] = 0;
+    }
+  }
+}
+
+bool activo(uint8_t pin) { return digitalRead(pin) == LOW; }  // optoacoplador tira a GND
+
+uint8_t leerEtapa() {
+  return (activo(IN_B0) ? 1 : 0) | (activo(IN_B1) ? 2 : 0) |
+         (activo(IN_B2) ? 4 : 0) | (activo(IN_B3) ? 8 : 0);
+}
+
+void leerPeso() {
+  if (!balanza.is_ready()) return;
+  float g = balanza.get_units(1);
+  if (!pesoValido) { peso = g; pesoValido = true; }
+  else peso = peso * 0.6 + g * 0.4;   // filtro simple
+}
+
+void tarar() {
+  balanza.tare(5);   // unos 0,5 s a 10 lecturas por segundo
+  peso = 0;
+}
+
+void procesarComando(String c) {
+  c.trim();
+  c.toUpperCase();
+  if (c == &quot;P&quot;) pulsar(R_PARTIR);
+  else if (c == &quot;M&quot;) pulsar(R_MARCHA);
+  else if (c == &quot;S&quot;) pulsar(R_PARO);
+  else if (c == &quot;R&quot;) pulsar(R_RESET);
+  else if (c == &quot;Z&quot;) tarar();
+  else if (c.startsWith(&quot;SP &quot;)) { cfg.meta = constrain(c.substring(3).toInt(), 10, 2000); guardarConfig(); }
+  else if (c.startsWith(&quot;CO &quot;)) { cfg.comp = constrain(c.substring(3).toInt(), 0, 500); guardarConfig(); }
+  else if (c.startsWith(&quot;TL &quot;)) { cfg.tol  = constrain(c.substring(3).toInt(), 1, 200); guardarConfig(); }
+  else if (c == &quot;CAL0&quot;) {
+    balanza.set_scale();      // factor 1
+    balanza.tare(10);
+    Serial.println(F(&quot;{\&quot;msg\&quot;:\&quot;Celda en cero. Ponga el peso conocido y envie CAL &lt;gramos&gt;\&quot;}&quot;));
+  }
+  else if (c.startsWith(&quot;CAL &quot;)) {
+    float conocido = c.substring(4).toFloat();
+    if (conocido &gt; 0) {
+      float lectura = balanza.get_value(10);
+      cfg.factor = lectura / conocido;
+      balanza.set_scale(cfg.factor);
+      guardarConfig();
+      Serial.print(F(&quot;{\&quot;msg\&quot;:\&quot;Calibrado. Factor = &quot;));
+      Serial.print(cfg.factor, 3);
+      Serial.println(F(&quot;\&quot;}&quot;));
+    }
+  }
+}
+
+void leerSerie() {
+  while (Serial.available()) {
+    char ch = Serial.read();
+    if (ch == &#x27;\n&#x27; || ch == &#x27;\r&#x27;) {
+      if (linea.length()) procesarComando(linea);
+      linea = &quot;&quot;;
+    } else if (linea.length() &lt; 32) {
+      linea += ch;
+    }
+  }
+}
+
+void enviarEstado() {
+  Serial.print(F(&quot;{\&quot;w\&quot;:&quot;));   Serial.print(peso, 1);
+  Serial.print(F(&quot;,\&quot;st\&quot;:&quot;));  Serial.print(etapa);
+  Serial.print(F(&quot;,\&quot;run\&quot;:&quot;)); Serial.print(cicloActivo ? 1 : 0);
+  Serial.print(F(&quot;,\&quot;cut\&quot;:&quot;)); Serial.print(digitalRead(R_CORTE) == RELE_ON ? 1 : 0);
+  Serial.print(F(&quot;,\&quot;tol\&quot;:&quot;)); Serial.print(digitalRead(R_TOL) == RELE_ON ? 1 : 0);
+  Serial.print(F(&quot;,\&quot;sp\&quot;:&quot;));  Serial.print(cfg.meta);
+  Serial.print(F(&quot;,\&quot;co\&quot;:&quot;));  Serial.print(cfg.comp);
+  Serial.print(F(&quot;,\&quot;tl\&quot;:&quot;));  Serial.print(cfg.tol);
+  Serial.println(F(&quot;}&quot;));
+}
+
+void setup() {
+  Serial.begin(115200);
+  for (uint8_t pin = R_PARTIR; pin &lt;= R_TOL; pin++) {
+    digitalWrite(pin, RELE_OFF);   // primero el nivel, despues el modo: el rele no parpadea al encender
+    pinMode(pin, OUTPUT);
+  }
+  pinMode(IN_TARA, INPUT_PULLUP);
+  pinMode(IN_B0, INPUT_PULLUP);
+  pinMode(IN_B1, INPUT_PULLUP);
+  pinMode(IN_B2, INPUT_PULLUP);
+  pinMode(IN_B3, INPUT_PULLUP);
+  pinMode(IN_RUN, INPUT_PULLUP);
+
+  cargarConfig();
+  balanza.begin(PIN_DT, PIN_SCK);
+  balanza.set_scale(cfg.factor);
+  tarar();
+  Serial.println(F(&quot;{\&quot;msg\&quot;:\&quot;Pesaje listo\&quot;}&quot;));
+}
+
+void loop() {
+  leerSerie();
+  atenderPulsos();
+  leerPeso();
+
+  // Etapa del PLC: se acepta cuando se lee igual 3 veces seguidas
+  uint8_t e = leerEtapa();
+  if (e == etapaLeida) { if (repeticiones &lt; 3) repeticiones++; }
+  else { etapaLeida = e; repeticiones = 0; }
+  if (repeticiones &gt;= 3) etapa = etapaLeida;
+  cicloActivo = activo(IN_RUN);
+
+  // Tara: al activarse Y10 (flanco de subida)
+  bool tara = activo(IN_TARA);
+  if (tara &amp;&amp; !taraPrevia) tarar();
+  taraPrevia = tara;
+
+  // Senal de corte: peso &gt;= meta - compensacion
+  bool corte = pesoValido &amp;&amp; peso &gt;= (cfg.meta - cfg.comp);
+  digitalWrite(R_CORTE, corte ? RELE_ON : RELE_OFF);
+
+  // Senal de fuera de tolerancia: |peso - meta| &gt; tolerancia
+  bool fuera = pesoValido &amp;&amp; fabs(peso - cfg.meta) &gt; cfg.tol;
+  digitalWrite(R_TOL, fuera ? RELE_ON : RELE_OFF);
+
+  // Registro del saco: peso al cortar y peso final estable
+  if (etapa != etapaPrevia) {
+    if (etapaPrevia == 5 &amp;&amp; etapa == 6) pesoEnCorte = peso;
+    if (etapaPrevia == 6 &amp;&amp; (etapa == 7 || etapa == 15)) {
+      pesoFinal = peso;
+      Serial.print(F(&quot;{\&quot;evt\&quot;:\&quot;fin\&quot;,\&quot;wcut\&quot;:&quot;)); Serial.print(pesoEnCorte, 1);
+      Serial.print(F(&quot;,\&quot;wfin\&quot;:&quot;)); Serial.print(pesoFinal, 1);
+      Serial.println(F(&quot;}&quot;));
+    }
+    etapaPrevia = etapa;
+  }
+
+  if (millis() - ultimoEnvio &gt;= 100) {
+    ultimoEnvio = millis();
+    enviarEstado();
+  }
+}
+</pre>
+  </details>
+  <div class="card tbl" style="margin-top:14px"><table>
+    <thead><tr><th>Mensaje</th><th>Dirección</th><th>Qué hace</th></tr></thead>
+    <tbody>
+      <tr><td class="a">{"w":452.3,"st":5,...}</td><td>Arduino → HMI</td><td>Peso, etapa, ciclo activo, señales de corte y tolerancia, 10 veces por segundo</td></tr>
+      <tr><td class="a">{"evt":"fin",...}</td><td>Arduino → HMI</td><td>Peso al cortar y peso final de cada saco, para medir la caída</td></tr>
+      <tr><td class="a">P · M · S · R</td><td>HMI → Arduino</td><td>PARTIR, MARCHA, PARO y RESET: pulso de 0,3 s en el relé correspondiente</td></tr>
+      <tr><td class="a">SP 500 · CO 50 · TL 15</td><td>HMI → Arduino</td><td>Meta, compensación y tolerancia en gramos</td></tr>
+      <tr><td class="a">CAL0 · CAL 500 · Z</td><td>HMI → Arduino</td><td>Calibración y puesta en cero</td></tr>
+    </tbody></table></div>
+</section>
+</div>
+
+<script>
+"use strict";
+/* ================= Datos ================= */
+const DEV = {
+  X0:["EMERG_OK","Parada de emergencia, NC (1 = sin emergencia)","Seta NC 22 mm"],
+  X1:["PARO_FIS","Paro físico, NC","Pulsador rojo NC"],
+  X2:["MARCHA_FIS","Marcha física","Pulsador verde NA"],
+  X3:["HAY_PALLET","Quedan pallets en la torre","Sensor fotoeléctrico"],
+  X4:["EMP_ADEL","Empujador adelante","Final de carrera"],
+  X5:["EMP_ATRAS","Empujador atrás","Final de carrera"],
+  X6:["S1_LLENADO","Pallet en el puesto de llenado","Sensor fotoeléctrico S1"],
+  X7:["S2_VIBRA","Pallet en el puesto de vibración","Sensor fotoeléctrico S2"],
+  X10:["S3_RETIRO","Pallet en la zona de retiro","Sensor fotoeléctrico S3"],
+  X11:["PARTIR_FIS","PARTIR físico (respaldo de la HMI)","Pulsador NA"],
+  X12:["RESET_FIS","Reset de alarma físico","Pulsador NA"],
+  X20:["HMI_PARTIR","PARTIR desde la HMI","Relé D2 del Arduino"],
+  X21:["HMI_MARCHA","MARCHA desde la HMI","Relé D3 del Arduino"],
+  X22:["HMI_PARO","PARO desde la HMI","Relé D4 del Arduino"],
+  X23:["HMI_RESET","RESET desde la HMI","Relé D5 del Arduino"],
+  X24:["PESO_CORTE","Peso de corte alcanzado","Relé D6 del Arduino"],
+  X25:["FUERA_TOL","Peso final fuera de tolerancia","Relé D7 del Arduino"],
+  Y0:["CORREA","Motor de la correa","Relé 24 V → motorreductor"],
+  Y1:["EMP_AVANZA","Empujador avanza","Relé 24 V (polaridad +)"],
+  Y2:["EMP_RETROC","Empujador retrocede","Relé 24 V (polaridad −)"],
+  Y3:["VALVULA","Válvula del silo abierta","Relé 24 V → solenoide"],
+  Y4:["VIBRADOR","Motor vibrador","Relé 24 V → vibrador"],
+  Y5:["LUZ_VERDE","Ciclo activo","Piloto verde 24 V"],
+  Y6:["LUZ_AMBAR","Espera al operador","Piloto ámbar 24 V"],
+  Y7:["LUZ_ROJA","Alarma","Piloto rojo 24 V"],
+  Y10:["TARAR","Orden de tara al Arduino","Optoacoplador → D8"],
+  Y11:["CICLO_ARD","Ciclo activo, al Arduino","Optoacoplador → A2"],
+  Y20:["ETAPA_B0","Etapa, bit 0","Optoacoplador → D9"],
+  Y21:["ETAPA_B1","Etapa, bit 1","Optoacoplador → D10"],
+  Y22:["ETAPA_B2","Etapa, bit 2","Optoacoplador → D11"],
+  Y23:["ETAPA_B3","Etapa, bit 3","Optoacoplador → D12"],
+  M100:["CICLO_ACT","Ciclo automático activo"],
+  M101:["FALLA","Alarma activa (requiere RESET)"],
+  M102:["PERMISO","Permiso de movimiento: sin emergencia, en marcha y sin falla"],
+  M110:["PULSO_PART","Pulso de un ciclo de scan al presionar PARTIR"],
+  T0:["T_VIBRA","Tiempo de vibración, K50 = 5 s"],
+  T1:["T_LLENADO","Tiempo máximo de llenado, K600 = 60 s"],
+  T2:["T_TARA","Espera de tara, K15 = 1,5 s"],
+  T3:["T_ESTABLE","Estabilización del peso, K20 = 2 s"],
+  T4:["T_MOVIM","Tiempo máximo de un movimiento, K200 = 20 s"],
+  D100:["ETAPA_NUM","Número de etapa que se envía a la HMI"],
+  D101:["COD_FALLA","Código de falla: 1 llenado, 2 tolerancia, 3 movimiento, 4 emergencia"],
+  M8002:["PRIMER_SCAN","Especial: ON solo en el primer scan"],
+  M8000:["SIEMPRE_ON","Especial: siempre ON en RUN"]
+};
+const STAGES = [
+  {n:0, t:"Reposo", who:"Auto", d:"Máquina lista. Espera MARCHA, pallets en la torre, empujador atrás y la línea vacía.", adv:"MARCHA y X3, X5 con la línea libre"},
+  {n:1, t:"Dispensar pallet", who:"Auto", d:"El empujador saca el pallet de abajo de la torre y lo deja sobre la correa.", adv:"X4 empujador adelante"},
+  {n:2, t:"Transporte a llenado", who:"Auto", d:"El empujador vuelve atrás y la correa lleva el pallet hasta el silo.", adv:"X6 sensor S1"},
+  {n:3, t:"Colocar el saco", who:"Operador", d:"Correa detenida y luz ámbar. El operador cuelga el saco en los ganchos y pone la boca en la descarga del silo.", adv:"PARTIR en la HMI"},
+  {n:4, t:"Tara", who:"Auto", d:"El PLC le pide al Arduino poner la balanza en cero con el saco vacío colgado.", adv:"T2 = 1,5 s"},
+  {n:5, t:"Llenado", who:"Auto", d:"Válvula abierta. El operador ve el peso subir en la HMI.", adv:"X24 peso ≥ meta − compensación"},
+  {n:6, t:"Estabilizar y verificar", who:"Auto", d:"Válvula cerrada. Cae el producto que quedaba en el aire y se lee el peso final.", adv:"T3 = 2 s y peso dentro de tolerancia"},
+  {n:7, t:"Retirar los ganchos", who:"Operador", d:"Proceso en pausa y luz ámbar. El operador suelta el saco de los ganchos y la descarga.", adv:"PARTIR en la HMI"},
+  {n:8, t:"Transporte a vibración", who:"Auto", d:"La correa lleva el saco al puesto de vibración.", adv:"X7 sensor S2"},
+  {n:9, t:"Vibración", who:"Auto", d:"El vibrador asienta el producto durante un tiempo fijo.", adv:"T0 = 5 s"},
+  {n:10, t:"Transporte a retiro", who:"Auto", d:"La correa lleva el saco al final de la línea.", adv:"X10 sensor S3"},
+  {n:11, t:"Espera de grúa horquilla", who:"Operador", d:"El saco espera en la zona de retiro hasta que la grúa lo lleva a despacho.", adv:"X10 se apaga: el pallet salió"}
+];
+const FAULTS = {1:"Tiempo de llenado excedido (60 s). Revise el silo y la válvula, luego presione RESET.",
+  2:"Peso final fuera de tolerancia. Corrija el saco a mano y presione RESET.",
+  3:"Un movimiento no terminó en 20 s. Revise la correa, el empujador y los sensores.",
+  4:"Parada de emergencia activada. Suelte la seta y presione RESET."};
+
+/* Peldaños: c = contactos en serie; un elemento {p:[...]} es un grupo en paralelo (OR). o = salidas */
+const C = (a,nc)=>({a,nc:!!nc});
+const R = [];
+let B = 0;
+const BLOCKS = [
+  {t:"Bloque 1 · Arranque y modos", d:"Deciden si la máquina puede moverse. Ningún motor se enciende sin la marca M102."},
+  {t:"Bloque 2 · Secuencia", d:"Una transición por peldaño: etapa actual + condición → SET etapa siguiente y RST etapa actual. Es el GRAFCET escrito en ladder."},
+  {t:"Bloque 3 · Tiempos y vigilancia", d:"Temporizadores del proceso y alarmas por tiempo. Detectan si algo se trabó."},
+  {t:"Bloque 4 · Salidas", d:"Cada salida física se escribe una sola vez, al final, según la etapa activa y el permiso M102."},
+  {t:"Bloque 5 · Etapa hacia la HMI", d:"El número de etapa se guarda en D100 y sale en binario por Y20 a Y23 hacia el Arduino, que se lo pasa a la HMI."}
+];
+function rung(t, c, o, x){ R.push({blk:B, t, c, o, x}); }
+/* Bloque 1 */
+B=0;
+rung("Primer scan: empezar en reposo", [C("M8002")], [{op:"SET",a:"M0"}], "M8002 vale 1 solo en el primer ciclo después de pasar a RUN. Deja la etapa 0 activa.");
+rung("Marcha del ciclo automático", [{p:[C("X2"),C("X21")]}, C("X0"), C("X1"), C("X22",1), C("M101",1)], [{op:"SET",a:"M100"}], "MARCHA física o de la HMI enciende y enclava “ciclo activo”, solo si la emergencia y el paro están sanos y no hay alarma.");
+rung("Paro del ciclo", [{p:[C("X1",1),C("X22"),C("X0",1)]}], [{op:"RST",a:"M100"}], "Paro físico, PARO de la HMI o emergencia apagan “ciclo activo”. La etapa queda guardada: con MARCHA continúa donde quedó.");
+rung("Parada de emergencia", [C("X0",1)], [{op:"ZRST",a:"M0",b:"M11"},{op:"SET",a:"M0"},{op:"SET",a:"M101"},{op:"MOV",a:"K4",b:"D101"}], "Si se presiona la seta, se borran todas las etapas, se vuelve a reposo y queda una alarma con código 4. La línea se revisa a mano antes de seguir.");
+rung("Pulso de PARTIR", [{p:[C("X11"),C("X20")]}], [{op:"PLS",a:"M110"}], "PLS enciende M110 durante un solo scan. Así, mantener apretado PARTIR no salta dos etapas seguidas.");
+rung("Permiso de movimiento", [C("X0"), C("M100"), C("M101",1)], [{op:"OUT",a:"M102"}], "M102 resume las condiciones de seguridad. Todas las salidas de motores, la válvula y el vibrador lo piden.");
+/* Bloque 2 */
+B=1;
+rung("Etapa 0 → 1: dispensar", [C("M0"),C("M102"),C("X3"),C("X5"),C("X6",1),C("X7",1),C("X10",1)], [{op:"SET",a:"M1"},{op:"RST",a:"M0"}], "Parte un ciclo si hay pallets, el empujador está atrás y no hay ningún pallet en la línea.");
+rung("Etapa 1 → 2: pallet en la correa", [C("M1"),C("X4")], [{op:"SET",a:"M2"},{op:"RST",a:"M1"}], "Cuando el empujador llega adelante, el pallet ya quedó sobre la correa.");
+rung("Etapa 2 → 3: llegó al llenado", [C("M2"),C("X6")], [{op:"SET",a:"M3"},{op:"RST",a:"M2"}], "El sensor S1 detecta el pallet bajo el silo; al salir de la etapa 2 la correa se detiene.");
+rung("Etapa 3 → 4: saco colocado", [C("M3"),C("M110"),C("M102")], [{op:"SET",a:"M4"},{op:"RST",a:"M3"}], "El operador colgó el saco y presionó PARTIR.");
+rung("Etapa 4 → 5: tara lista", [C("M4"),C("T2")], [{op:"SET",a:"M5"},{op:"RST",a:"M4"}], "Pasado 1,5 s de tara, se abre la válvula.");
+rung("Etapa 5 → 6: peso de corte", [C("M5"),C("X24")], [{op:"SET",a:"M6"},{op:"RST",a:"M5"}], "El Arduino avisa que el peso llegó a meta − compensación (por ejemplo 450 g). Al dejar la etapa 5 la válvula se cierra.");
+rung("Etapa 6 → 7: peso correcto", [C("M6"),C("T3"),C("X25",1)], [{op:"SET",a:"M7"},{op:"RST",a:"M6"}], "Después de 2 s de estabilización, si el peso está dentro de tolerancia, se pausa para retirar los ganchos.");
+rung("Etapa 6: peso fuera de tolerancia", [C("M6"),C("T3"),C("X25")], [{op:"SET",a:"M101"},{op:"MOV",a:"K2",b:"D101"}], "Si el peso quedó fuera de tolerancia, alarma con código 2. El saco se corrige a mano; cuando el peso entra en tolerancia y se presiona RESET, el ciclo sigue.");
+rung("Etapa 7 → 8: ganchos retirados", [C("M7"),C("M110"),C("M102")], [{op:"SET",a:"M8"},{op:"RST",a:"M7"}], "El operador soltó el saco y presionó PARTIR otra vez.");
+rung("Etapa 8 → 9: llegó a vibración", [C("M8"),C("X7")], [{op:"SET",a:"M9"},{op:"RST",a:"M8"}], "El sensor S2 detecta el pallet en el puesto de vibración.");
+rung("Etapa 9 → 10: vibración terminada", [C("M9"),C("T0")], [{op:"SET",a:"M10"},{op:"RST",a:"M9"}], "Se cumplieron los 5 s de vibración.");
+rung("Etapa 10 → 11: llegó al retiro", [C("M10"),C("X10")], [{op:"SET",a:"M11"},{op:"RST",a:"M10"}], "El sensor S3 detecta el pallet al final de la correa.");
+rung("Etapa 11 → 0: grúa retiró el saco", [C("M11"),C("X10",1)], [{op:"SET",a:"M0"},{op:"RST",a:"M11"}], "Cuando la grúa horquilla saca el pallet, S3 se apaga y se vuelve a reposo; si sigue en marcha, parte otro ciclo.");
+/* Bloque 3 */
+B=2;
+rung("Tiempo de tara", [C("M4")], [{op:"T",a:"T2",k:"K15"}], "Cuenta 1,5 s en la etapa 4, el tiempo que el Arduino necesita para tarar.");
+rung("Tiempo de estabilización", [C("M6")], [{op:"T",a:"T3",k:"K20"}], "Cuenta 2 s con la válvula cerrada, para que termine de caer el producto.");
+rung("Tiempo de vibración", [C("M9"),C("M102")], [{op:"T",a:"T0",k:"K50"}], "Cuenta 5 s de vibración. Si se presiona PARO, el tiempo vuelve a cero.");
+rung("Vigilancia del llenado", [C("M5"),C("M102")], [{op:"T",a:"T1",k:"K600"}], "Si el llenado dura más de 60 s, algo anda mal: silo vacío, válvula trabada o celda desconectada.");
+rung("Alarma de llenado", [C("T1")], [{op:"SET",a:"M101"},{op:"MOV",a:"K1",b:"D101"}], "Al cumplirse T1, alarma con código 1. M102 se apaga y la válvula se cierra.");
+rung("Vigilancia de movimientos", [{p:[C("M1"),C("M2"),C("M8"),C("M10")]}, C("M102")], [{op:"T",a:"T4",k:"K200"}], "Cuenta mientras el empujador o la correa están moviendo un pallet.");
+rung("Alarma de movimiento", [C("T4")], [{op:"SET",a:"M101"},{op:"MOV",a:"K3",b:"D101"}], "Si un movimiento dura más de 20 s, alarma con código 3: pallet trabado o sensor que no detecta.");
+rung("Reset de alarma", [{p:[C("X12"),C("X23")]}, C("X0")], [{op:"RST",a:"M101"},{op:"MOV",a:"K0",b:"D101"}], "RESET físico o de la HMI borra la alarma, solo si la emergencia ya está liberada.");
+/* Bloque 4 */
+B=3;
+rung("Correa", [{p:[C("M2"),C("M8"),C("M10")]}, C("M102")], [{op:"OUT",a:"Y0"}], "La correa anda en las tres etapas de transporte y se detiene sola al cambiar de etapa.");
+rung("Empujador avanza", [C("M1"),C("M102"),C("X4",1),C("Y2",1)], [{op:"OUT",a:"Y1"}], "Avanza en la etapa 1 hasta tocar X4. El contacto NC de Y2 impide activar las dos polaridades a la vez.");
+rung("Empujador retrocede", [C("M1",1),C("X5",1),C("M102"),C("Y1",1)], [{op:"OUT",a:"Y2"}], "Fuera de la etapa 1, si no está atrás, vuelve atrás solo.");
+rung("Válvula del silo", [C("M5"),C("M102")], [{op:"OUT",a:"Y3"}], "Abierta solo en la etapa 5. Con PARO, alarma o emergencia se cierra al instante.");
+rung("Vibrador", [C("M9"),C("M102")], [{op:"OUT",a:"Y4"}], "Funciona solo en la etapa 9.");
+rung("Orden de tara", [C("M4")], [{op:"OUT",a:"Y10"}], "Y10 se mantiene en la etapa 4; el Arduino tara al ver que se enciende.");
+rung("Luz verde", [C("M100"),C("M101",1)], [{op:"OUT",a:"Y5"}], "Ciclo activo y sin alarma.");
+rung("Luz ámbar", [{p:[C("M3"),C("M7")]}], [{op:"OUT",a:"Y6"}], "La máquina espera al operador: colocar el saco o retirar los ganchos.");
+rung("Luz roja", [C("M101")], [{op:"OUT",a:"Y7"}], "Hay una alarma.");
+rung("Ciclo activo al Arduino", [C("M100")], [{op:"OUT",a:"Y11"}], "La HMI sabe si la máquina está en marcha o en pausa.");
+/* Bloque 5 */
+B=4;
+for (let k=0;k<12;k++) rung(`Etapa ${k} → D100 = ${k}`, [C("M"+k)], [{op:"MOV",a:"K"+k,b:"D100"}], k===0?"Cada etapa escribe su número en D100. Se repite igual para las 12 etapas.":"");
+rung("Alarma → D100 = 15", [C("M101")], [{op:"MOV",a:"K15",b:"D100"}], "Con alarma la HMI recibe 15. Va después de las etapas para tener prioridad.");
+rung("D100 hacia Y20 a Y23", [C("M8000")], [{op:"MOV",a:"D100",b:"K1Y20"}], "K1Y20 son 4 salidas seguidas: Y20, Y21, Y22 e Y23. MOV copia los 4 bits bajos de D100 en ellas.");
+
+/* ================= Listado (IL) ================= */
+function ilOf(r){
+  const L=[]; let first=true;
+  for (const e of r.c){
+    if (e.p){ e.p.forEach((b,i)=>{ L.push((i===0?(first?(b.nc?"LDI":"LD"):(b.nc?"ANI":"AND")):(b.nc?"ORI":"OR"))+" "+b.a); }); first=false; }
+    else { L.push((first?(e.nc?"LDI":"LD"):(e.nc?"ANI":"AND"))+" "+e.a); first=false; }
+  }
+  for (const o of r.o){
+    if (o.op==="T") L.push(`OUT ${o.a} ${o.k}`);
+    else if (o.op==="MOV"||o.op==="ZRST") L.push(`${o.op} ${o.a} ${o.b}`);
+    else L.push(`${o.op} ${o.a}`);
+  }
+  return L;
+}
+
+/* ================= Dibujo del ladder ================= */
+const SVGNS="http://www.w3.org/2000/svg";
+function el(tag, attrs, parent){ const n=document.createElementNS(SVGNS,tag); for (const k in attrs) n.setAttribute(k,attrs[k]); if(parent) parent.appendChild(n); return n; }
+function txt(x,y,s,cls,parent,anchor){ const t=el("text",{x,y,class:cls,"text-anchor":anchor||"middle"},parent); t.textContent=s; return t; }
+const CW=96, ROW=64, PADY=30;
+const live = []; // {g, kind, a, nc, rungIdx}
+function shortCmt(a){ const d=DEV[a]; if(d) return d[0]; if(/^M\d+$/.test(a)&&+a.slice(1)<=11) return "ETAPA_"+a.slice(1); return ""; }
+function drawContact(g, x, y, c, ri){
+  const grp=el("g",{},g);
+  el("line",{x1:x,y1:y,x2:x+CW/2-7,y2:y,class:"w"},grp);
+  el("line",{x1:x+CW/2+7,y1:y,x2:x+CW,y2:y,class:"w"},grp);
+  el("line",{x1:x+CW/2-7,y1:y-10,x2:x+CW/2-7,y2:y+10,class:"ct-bar"},grp);
+  el("line",{x1:x+CW/2+7,y1:y-10,x2:x+CW/2+7,y2:y+10,class:"ct-bar"},grp);
+  if (c.nc) el("line",{x1:x+CW/2-10,y1:y+10,x2:x+CW/2+10,y2:y-10,class:"ct-bar"},grp);
+  txt(x+CW/2,y-15,c.a,"lbl",grp);
+  txt(x+CW/2,y+24,shortCmt(c.a),"cmt",grp);
+  live.push({g:grp,kind:"c",a:c.a,nc:c.nc,ri});
+}
+function drawRung(r, ri){
+  // ancho de la zona de contactos
+  let cols=0, rows=1;
+  for (const e of r.c){ cols++; if (e.p) rows=Math.max(rows,e.p.length); }
+  const outRows=r.o.length;
+  const H = PADY + Math.max(rows,outRows)*ROW;
+  const x0=14, coilX = x0 + cols*CW + 24, OW=150, W = coilX + OW + 24;
+  const svg=el("svg",{width:W,height:H,viewBox:`0 0 ${W} ${H}`,role:"img","aria-label":"Peldaño "+(ri+1)+": "+r.t});
+  const y0 = PADY+4;
+  el("line",{x1:x0,y1:6,x2:x0,y2:H-6,class:"rail"},svg);
+  el("line",{x1:W-12,y1:6,x2:W-12,y2:H-6,class:"rail"},svg);
+  let x=x0;
+  for (const e of r.c){
+    if (e.p){
+      e.p.forEach((b,i)=>{ drawContact(svg,x,y0+i*ROW,b,ri); });
+      if (e.p.length>1){
+        el("line",{x1:x,y1:y0,x2:x,y2:y0+(e.p.length-1)*ROW,class:"w"},svg);
+        el("line",{x1:x+CW,y1:y0,x2:x+CW,y2:y0+(e.p.length-1)*ROW,class:"w"},svg);
+      }
+    } else drawContact(svg,x,y0,e,ri);
+    x+=CW;
+  }
+  el("line",{x1:x,y1:y0,x2:coilX,y2:y0,class:"w"},svg);
+  if (outRows>1) el("line",{x1:coilX,y1:y0,x2:coilX,y2:y0+(outRows-1)*ROW,class:"w"},svg);
+  r.o.forEach((o,i)=>{
+    const y=y0+i*ROW, g=el("g",{},svg);
+    if (o.op==="OUT"||o.op==="T"){
+      const cx=coilX+OW/2;
+      el("line",{x1:coilX,y1:y,x2:cx-12,y2:y,class:"w"},g);
+      el("path",{d:`M${cx-6} ${y-11} Q${cx-14} ${y} ${cx-6} ${y+11}`,class:"coil"},g);
+      el("path",{d:`M${cx+6} ${y-11} Q${cx+14} ${y} ${cx+6} ${y+11}`,class:"coil"},g);
+      el("line",{x1:cx+12,y1:y,x2:W-12,y2:y,class:"w"},g);
+      txt(cx,y-16,o.op==="T"?`${o.a}  ${o.k}`:o.a,"lbl",g);
+      txt(cx,y+25,shortCmt(o.a),"cmt",g);
+    } else {
+      const bx=coilX+8, bw=OW-8;
+      el("line",{x1:coilX,y1:y,x2:bx,y2:y,class:"w"},g);
+      el("rect",{x:bx,y:y-13,width:bw,height:26,rx:3,class:"box"},g);
+      el("line",{x1:bx+bw,y1:y,x2:W-12,y2:y,class:"w"},g);
+      const s = o.op==="MOV"||o.op==="ZRST" ? `${o.op} ${o.a} ${o.b}` : `${o.op} ${o.a}`;
+      txt(bx+bw/2,y+4,s,"lbl",g);
+      if (o.op!=="MOV"&&o.op!=="ZRST") txt(bx+bw/2,y+25,shortCmt(o.a),"cmt",g);
+    }
+    live.push({g,kind:"o",o,ri});
+  });
+  return svg;
+}
+function buildLadder(){
+  const host=document.getElementById("ladderBlocks");
+  BLOCKS.forEach((b,bi)=>{
+    const sec=document.createElement("div"); sec.className="block";
+    sec.innerHTML=`<h3>${b.t}</h3><p>${b.d}</p>`;
+    R.forEach((r,ri)=>{
+      if (r.blk!==bi) return;
+      const row=document.createElement("div"); row.className="rung"; row.id="r"+(ri+1);
+      const il=ilOf(r).join("\n");
+      row.innerHTML=`<div class="rn">${String(ri+1).padStart(2,"0")}</div><div><div class="rt">${r.t}</div>${r.x?`<p class="rx">${r.x}</p>`:""}<div class="rsvg"></div><details><summary>Listado para escribir en GX Works2</summary><pre>${il}</pre></details></div>`;
+      row.querySelector(".rsvg").appendChild(drawRung(r,ri));
+      r.row=row;
+      sec.appendChild(row);
+    });
+    host.appendChild(sec);
+  });
+}
+
+/* ================= Motor PLC (ejecuta los peldaños) ================= */
+const P = { bits:{}, T:{}, D:{D100:0,D101:0}, first:true, plsPrev:{} };
+const TK = {};
+R.forEach(r=>r.o.forEach(o=>{ if(o.op==="T") TK[o.a]=parseInt(o.k.slice(1)); }));
+function bit(a){
+  if (a==="M8002") return P.first; if (a==="M8000") return true;
+  if (a[0]==="T") return !!(P.T[a]&&P.T[a].done);
+  return !!P.bits[a];
+}
+function contactOK(c){ const v=bit(c.a); return c.nc?!v:v; }
+function evalCond(r){
+  let ok=true;
+  for (const e of r.c){
+    const v = e.p ? e.p.some(contactOK) : contactOK(e);
+    ok = ok && v;
+  }
+  return ok;
+}
+function scan(dt){
+  R.forEach((r,ri)=>{
+    const ok=evalCond(r); r.last=ok;
+    for (const o of r.o){
+      switch(o.op){
+        case "OUT": P.bits[o.a]=ok; break;
+        case "SET": if(ok) P.bits[o.a]=true; break;
+        case "RST": if(ok) P.bits[o.a]=false; break;
+        case "ZRST": if(ok){ const a=+o.a.slice(1), b=+o.b.slice(1); for(let i=a;i<=b;i++) P.bits["M"+i]=false; } break;
+        case "PLS": { const prev=!!P.plsPrev[ri]; P.bits[o.a]= ok && !prev; P.plsPrev[ri]=ok; break; }
+        case "T": { const t=P.T[o.a]||(P.T[o.a]={acc:0,done:false}); if(ok){ t.acc+=dt; t.done = t.acc >= TK[o.a]*0.1 - 1e-9; } else { t.acc=0; t.done=false; } break; }
+        case "MOV": if(ok){
+          if (o.b==="K1Y20"){ const v=P.D[o.a]; for(let i=0;i<4;i++) P.bits["Y2"+i]=!!(v>>i&1); }
+          else P.D[o.b]= o.a[0]==="K" ? parseInt(o.a.slice(1)) : P.D[o.a]; } break;
+      }
+    }
+  });
+  P.first=false;
+}
+
+/* ================= Planta simulada ================= */
+const G = { belt0:150, belt1:885, S1:420, S2:640, S3:872, PW:70, pushTravel:92, magX:80 };
+let S;
+function resetSim(){
+  for (const k in P.bits) delete P.bits[k]; for (const k in P.T) delete P.T[k]; P.D.D100=0; P.D.D101=0; P.first=true; P.plsPrev={};
+  S = { t:0, store:6, pusher:0, pallets:[], valve:false, valveT:0, queue:[], tareOff:0, raw:0, w:0, estop:false,
+        pulses:{}, forkT:0, forkAnim:null, count:0, last:null, wcut:null, prevStage:0, noise:0, autoOpT:0, nextId:1, spilled:0 };
+  P.bits.X1=true;
+}
+function pulse(x, sec){ S.pulses[x]=sec||0.3; }
+function station(){ return S.pallets.find(p=>!p.pushing && Math.abs((p.x+G.PW)-G.S1)<14); }
+function sensorAt(xs){ return S.pallets.some(p=>!p.pushing && p.x+G.PW>=xs-1 && p.x<=xs); }
+function physics(dt){
+  const b=P.bits;
+  // pulsos de la HMI (relés del Arduino)
+  for (const k in S.pulses){ S.pulses[k]-=dt; if(S.pulses[k]<=0) delete S.pulses[k]; }
+  // empujador
+  if (b.Y1 && !b.Y2){
+    if (!S.pallets.some(p=>p.pushing) && S.store>0 && S.pusher<0.05){ S.store--; S.pallets.push({id:S.nextId++,x:G.magX,pushing:true,bag:null}); }
+    S.pusher=Math.min(1,S.pusher+dt/1.4);
+  } else if (b.Y2 && !b.Y1) S.pusher=Math.max(0,S.pusher-dt/1.4);
+  const pp=S.pallets.find(p=>p.pushing);
+  if (pp){ pp.x=G.magX+S.pusher*G.pushTravel; if (S.pusher>=0.999){ pp.x=G.magX+G.pushTravel; pp.pushing=false; } }
+  // correa
+  if (b.Y0){ S.beltPos=(S.beltPos||0)+110*dt; for (const p of S.pallets) if(!p.pushing && p.x>=G.magX+G.pushTravel-2) p.x=Math.min(G.belt1-G.PW, p.x+110*dt); }
+  // válvula con retardo y producto en el aire
+  const want=!!b.Y3;
+  if (want!==S.valve){ S.valveT+=dt; if (S.valveT>=0.15){ S.valve=want; S.valveT=0; } } else S.valveT=0;
+  if (S.valve){ const q=(84+12*Math.sin(S.t*3.1)+8*(Math.random()-.5))*dt; S.queue.push({land:S.t+0.45,g:q}); }
+  const st=station();
+  S.queue = S.queue.filter(m=>{ if (m.land<=S.t){ if(st&&st.bag&&st.bag.hooked) st.bag.g+=m.g; else S.spilled+=m.g; return false; } return true; });
+  // vibración
+  for (const p of S.pallets){ if (p.bag && b.Y4 && Math.abs((p.x+G.PW)-G.S2)<14) p.bag.settle=Math.min(1,(p.bag.settle||0)+dt/5); }
+  // celda de carga: mide el saco colgado
+  S.raw = (st&&st.bag&&st.bag.hooked) ? 30+st.bag.g : 0;
+  // grúa horquilla
+  const atEnd=S.pallets.find(p=>!p.pushing && p.x+G.PW>=G.S3-1);
+  if (atEnd && !b.Y0){ S.forkT+=dt; if (document.getElementById("autoFork").checked && S.forkT>3) removeFork(); } else S.forkT=0;
+  if (S.forkAnim){ S.forkAnim.t+=dt; if (S.forkAnim.t>1.2) S.forkAnim=null; }
+  // entradas del PLC
+  b.X0=!S.estop; b.X1=true; b.X2=false;
+  b.X3=S.store>0 || S.pallets.some(p=>p.pushing);
+  b.X4=S.pusher>=0.999; b.X5=S.pusher<=0.001;
+  b.X6=sensorAt(G.S1); b.X7=sensorAt(G.S2); b.X10=sensorAt(G.S3);
+  b.X11=false; b.X12=false;
+  b.X20=!!S.pulses.X20; b.X21=!!S.pulses.X21; b.X22=!!S.pulses.X22; b.X23=!!S.pulses.X23;
+  // Arduino simulado
+  if (b.Y10 && !S.prevTare) S.tareOff=S.raw;
+  S.prevTare=!!b.Y10;
+  S.noise = 0.85*S.noise + 0.15*(Math.random()-.5)*1.2;
+  S.w = S.raw - S.tareOff + (S.raw>0?S.noise:0);
+  const sp=num("pSp",500), co=num("pCo",50), tl=num("pTl",15);
+  b.X24 = S.w >= sp-co;
+  b.X25 = Math.abs(S.w-sp) > tl;
+  S.t+=dt;
+}
+function removeFork(){
+  const i=S.pallets.findIndex(p=>!p.pushing && p.x+G.PW>=G.S3-1);
+  if (i<0) return; const p=S.pallets[i];
+  S.forkAnim={t:0,x:p.x,bag:p.bag}; S.pallets.splice(i,1); S.forkT=0;
+  S.count++; document.getElementById("sCount").textContent=S.count;
+}
+function stageNow(){ for (let i=0;i<12;i++) if (P.bits["M"+i]) return i; return 0; }
+function num(id,d){ const v=parseFloat(document.getElementById(id).value); return isFinite(v)?v:d; }
+
+/* Operador: acciones físicas al presionar PARTIR */
+function operatorPartir(){
+  const st=stageNow();
+  const s=station();
+  if (st===3 && s && !s.bag) s.bag={g:0,hooked:true,settle:0};
+  if (st===7 && s && s.bag) s.bag.hooked=false;
+  pulse("X20");
+}
+
+/* ================= Esquema animado ================= */
+const mimic=document.getElementById("mimicSvg");
+let M={};
+function buildMimic(){
+  mimic.innerHTML="";
+  const g=el("g",{},mimic);
+  el("defs",{},g).innerHTML=`<pattern id="beltPat" width="24" height="10" patternUnits="userSpaceOnUse"><rect width="24" height="10" fill="var(--sunk)"/><line x1="0" y1="0" x2="0" y2="10" stroke="var(--line)" stroke-width="3"/></pattern>`;
+  // suelo
+  el("line",{x1:0,y1:300,x2:900,y2:300,stroke:"var(--line)","stroke-width":2},g);
+  // correa
+  el("rect",{x:G.belt0,y:226,width:G.belt1-G.belt0,height:14,rx:7,fill:"var(--steel)"},g);
+  M.belt=el("rect",{x:G.belt0+7,y:228,width:G.belt1-G.belt0-14,height:10,fill:"url(#beltPat)"},g);
+  M.pat=mimic.querySelector("#beltPat");
+  [G.belt0+7,G.belt1-7].forEach(cx=>el("circle",{cx,cy:233,r:6,fill:"var(--panel)",stroke:"var(--ink)"},g));
+  for (let x=60;x<880;x+=120) el("rect",{x:x,y:240,width:6,height:60,fill:"var(--line)"},g);
+  // torre
+  el("rect",{x:G.magX-6,y:96,width:5,height:102,fill:"var(--steel)"},g);
+  el("rect",{x:G.magX+G.PW+1,y:96,width:5,height:100,fill:"var(--steel)"},g);
+  el("rect",{x:G.magX-8,y:226,width:G.PW+16,height:6,fill:"var(--steel)"},g);
+  M.stack=el("g",{},g);
+  // empujador
+  M.rod=el("rect",{x:46,y:215,width:20,height:6,fill:"var(--ink)"},g);
+  el("rect",{x:6,y:208,width:42,height:20,rx:3,fill:"var(--panel)",stroke:"var(--ink)"},g);
+  txt(27,250,"empujador","cmt",g);
+  // silo y válvula
+  const cx=G.S1-G.PW/2;
+  el("path",{d:`M${cx-62} 14 H${cx+62} V58 L${cx+12} 96 H${cx-12} L${cx-62} 58 Z`,fill:"var(--panel)",stroke:"var(--ink)","stroke-width":1.5},g);
+  el("path",{d:`M${cx-58} 34 H${cx+58} V58 L${cx+10} 92 H${cx-10} L${cx-58} 58 Z`,fill:"var(--product)",stroke:"none"},g);
+  M.valve=el("rect",{x:cx-18,y:96,width:36,height:9,rx:2,fill:"var(--off)",stroke:"var(--ink)"},g);
+  el("rect",{x:cx-8,y:105,width:16,height:14,fill:"var(--panel)",stroke:"var(--ink)"},g);
+  M.stream=el("rect",{x:cx-3,y:119,width:6,height:0,fill:"var(--product)"},g);
+  M.hooks=el("g",{},g);
+  el("path",{d:`M${cx-17} 112 v30 m34 -30 v30`,stroke:"var(--ink)","stroke-width":2,fill:"none"},M.hooks);
+  // celda de carga
+  el("rect",{x:cx+66,y:112,width:46,height:14,rx:2,fill:"var(--panel)",stroke:"var(--ink)"},g);
+  el("line",{x1:cx+12,y1:112,x2:cx+66,y2:119,stroke:"var(--ink)"},g);
+  M.wtxt=el("text",{x:cx+89,y:145,"text-anchor":"middle","font-family":"var(--f-mono)","font-size":13,"font-weight":600,fill:"var(--ink)"},g);
+  txt(cx+89,106,"celda","cmt",g);
+  // vibrador
+  const vx=G.S2-G.PW/2;
+  M.vib=el("g",{},g);
+  el("rect",{x:vx-20,y:244,width:40,height:20,rx:3,fill:"var(--panel)",stroke:"var(--ink)"},M.vib);
+  M.vibw=el("path",{d:`M${vx-30} 254 l-6 -6 m6 6 l-6 6 M${vx+30} 254 l6 -6 m-6 6 l6 6`,stroke:"var(--off)","stroke-width":2,fill:"none"},M.vib);
+  // sensores
+  M.sens={};
+  [["X6",G.S1,"S1"],["X7",G.S2,"S2"],["X10",G.S3,"S3"]].forEach(([k,x,n])=>{
+    const s=el("g",{},g);
+    el("rect",{x:x-5,y:186,width:10,height:16,rx:2,fill:"var(--panel)",stroke:"var(--ink)"},s);
+    M.sens[k]=el("circle",{cx:x,cy:180,r:4,fill:"var(--off)"},s);
+    txt(x,172,n,"lbl",s);
+  });
+  // capa de pallets
+  M.pal=el("g",{},g);
+  // etiquetas
+  [["TORRE",G.magX+G.PW/2],["LLENADO",G.S1-G.PW/2],["VIBRACIÓN",G.S2-G.PW/2],["RETIRO · GRÚA",G.S3-G.PW/2]].forEach(([s,x])=>{
+    const t=txt(x,322,s,"lbl",g); t.setAttribute("font-family","var(--f-display)"); t.setAttribute("font-size","13"); t.setAttribute("letter-spacing","1");
+  });
+  M.fork=el("g",{},g);
+}
+function bagShape(parent, x, y, bag, jitter){
+  const sp=num("pSp",500), fillFrac=Math.min(1,(bag.g||0)/(sp*1.15));
+  const h=66*(1-0.08*(bag.settle||0)), w=50, bx=x+G.PW/2-w/2+jitter;
+  el("rect",{x:bx,y:y-h,width:w,height:h,rx:6,fill:"var(--panel)",stroke:"var(--ink)","stroke-width":1.5},parent);
+  const fh=(h-6)*fillFrac;
+  if (fh>0) el("rect",{x:bx+3,y:y-3-fh,width:w-6,height:fh,rx:4,fill:"var(--product)"},parent);
+  el("path",{d:`M${bx+8} ${y-h} v-6 m${w-16} 6 v-6`,stroke:"var(--ink)","stroke-width":2,fill:"none"},parent);
+}
+function renderMimic(){
+  const b=P.bits;
+  M.stack.innerHTML="";
+  for (let i=0;i<Math.min(S.store,7);i++){
+    el("rect",{x:G.magX,y:212-i*14-(S.pallets.some(p=>p.pushing)?14:0),width:G.PW,height:12,fill:"var(--product)",stroke:"var(--product-edge)"},M.stack);
+  }
+  M.rod.setAttribute("width",G.magX-46+S.pusher*G.pushTravel);
+  M.valve.setAttribute("fill", S.valve?"var(--run)":"var(--off)");
+  const falling=S.queue.length>0;
+  const st=station();
+  const target= st&&st.bag ? 226-14-66+((1-Math.min(1,st.bag.g/(num("pSp",500)*1.15)))*60) : 210;
+  M.stream.setAttribute("height", falling ? Math.max(0,target-119) : 0);
+  M.hooks.setAttribute("opacity", st&&st.bag&&st.bag.hooked ? 1 : .35);
+  M.wtxt.textContent = (S.w>=0?S.w:0).toFixed(1)+" g";
+  M.vibw.setAttribute("stroke", b.Y4?"var(--wait)":"var(--off)");
+  for (const k in M.sens) M.sens[k].setAttribute("fill", b[k]?"var(--run)":"var(--off)");
+  M.pat.setAttribute("patternTransform",`translate(${(S.beltPos||0)%24} 0)`);
+  M.pal.innerHTML="";
+  for (const p of S.pallets){
+    const g=el("g",{},M.pal);
+    el("rect",{x:p.x,y:212,width:G.PW,height:14,rx:2,fill:"var(--product)",stroke:"var(--ink)","stroke-width":1.2},g);
+    el("rect",{x:p.x+6,y:216,width:G.PW-12,height:6,fill:"var(--bg)"},g);
+    if (p.bag){
+      const vib = b.Y4 && Math.abs((p.x+G.PW)-G.S2)<14 ? (Math.sin(S.t*60)*1.6) : 0;
+      if (p.bag.hooked) bagShape(g,p.x,210,p.bag,0); else bagShape(g,p.x,212,p.bag,vib);
+    }
+  }
+  M.fork.innerHTML="";
+  if (S.forkAnim){
+    const k=S.forkAnim.t/1.2, fx=S.forkAnim.x + k*120;
+    const g=el("g",{opacity:1-k},M.fork);
+    el("rect",{x:fx,y:212-k*20,width:G.PW,height:14,fill:"var(--product)",stroke:"var(--ink)"},g);
+    if (S.forkAnim.bag) bagShape(g,fx,212-k*20,S.forkAnim.bag,0);
+  }
+}
+
+/* ================= HMI ================= */
+const stageList=document.getElementById("stageList");
+STAGES.forEach(s=>{ const li=document.createElement("li"); li.innerHTML=`<span>${s.n}</span><span>${s.t}</span>`; stageList.appendChild(li); });
+const flow=document.getElementById("flow");
+STAGES.forEach(s=>{
+  const a=document.createElement("article"); a.className="card step"+(s.who==="Operador"?" op":"");
+  a.innerHTML=`<div class="n">Etapa ${s.n} · M${s.n}</div><h3>${s.t}</h3><div class="who">${s.who==="Operador"?"Espera al operador":"Automático"}</div><p>${s.d}</p><p class="adv">Avanza con: ${s.adv}</p>`;
+  flow.appendChild(a);
+});
+function fmt(v){ return (Math.round(v*10)/10).toLocaleString("es-CL",{minimumFractionDigits:1,maximumFractionDigits:1}); }
+let REAL=null; // estado recibido del Arduino en modo real
+function hmiState(){
+  if (REAL) return { st:REAL.st, run:!!REAL.run, w:REAL.w, fault: REAL.st===15, code:0, lampG: REAL.run && REAL.st!==15, lampA: REAL.st===3||REAL.st===7, lampR: REAL.st===15, estop:false };
+  const b=P.bits, code=P.D.D101;
+  return { st: b.M101 ? 15 : stageNow(), stage: stageNow(), run:!!b.M100, w:S.w, fault:!!b.M101, code, lampG:!!b.Y5, lampA:!!b.Y6, lampR:!!b.Y7, estop:S.estop };
+}
+function updateParamsText(){
+  const sp=num("pSp",500), co=num("pCo",50), tl=num("pTl",15);
+  document.getElementById("calcCut").textContent=`La válvula cierra a los ${sp-co} g; el producto en caída completa los ${sp} g. Se acepta entre ${sp-tl} y ${sp+tl} g.`;
+  const max=sp*1.2;
+  document.getElementById("mkCut").style.left=((sp-co)/max*100)+"%";
+  document.getElementById("mkSp").style.left=(sp/max*100)+"%";
+  const tb=document.getElementById("tolBand"); tb.style.left=((sp-tl)/max*100)+"%"; tb.style.width=(2*tl/max*100)+"%";
+  document.getElementById("legCut").textContent="corte "+(sp-co);
+  document.getElementById("legSp").textContent="meta "+sp;
+}
+function renderHMI(){
+  const h=hmiState();
+  const sp=num("pSp",500);
+  document.getElementById("wNum").innerHTML=fmt(Math.max(0,h.w))+"<small>g</small>";
+  document.getElementById("wFill").style.width=Math.min(100,Math.max(0,h.w)/(sp*1.2)*100)+"%";
+  document.getElementById("lampG").classList.toggle("on",h.lampG);
+  document.getElementById("lampA").classList.toggle("on",h.lampA);
+  document.getElementById("lampR").classList.toggle("on",h.lampR);
+  const pill=document.getElementById("modePill");
+  pill.className="pill"+(h.fault?" alarm":h.lampA?" wait":h.run?" run":"");
+  pill.textContent=(REAL?"Real · ":"")+(h.fault?"Alarma":h.lampA?"Espera operador":h.run?"En marcha":"Detenido");
+  const msg=document.getElementById("msg"), stg=h.fault?null:STAGES[h.st];
+  let T,Bd,cls="";
+  if (h.fault){ T="Alarma"; Bd = FAULTS[h.code]||"Revise la máquina y presione RESET ALARMA."; cls="alarm"; }
+  else if (!h.run && h.st===0){ T="Listo"; Bd="Presione MARCHA para iniciar el ciclo automático."; }
+  else if (!h.run){ T="En pausa · "+stg.t; Bd="Presione MARCHA para continuar desde esta etapa."; }
+  else if (h.st===3){ T="Coloque el saco"; Bd="Cuelgue el saco en los ganchos, ponga la boca en la descarga del silo y presione PARTIR."; cls="wait"; }
+  else if (h.st===7){ T="Retire los ganchos"; Bd="Suelte el saco de los ganchos y de la descarga, aléjese y presione PARTIR."; cls="wait"; }
+  else if (h.st===11){ T="Saco listo para despacho"; Bd="Retire el pallet con la grúa horquilla."; cls="wait"; }
+  else { T=stg.t; Bd=stg.d; cls="run"; }
+  msg.className="msg "+cls; document.getElementById("msgT").textContent=T; document.getElementById("msgB").textContent=Bd;
+  const bp=document.getElementById("bPartir");
+  const ready = !h.fault && h.run && (h.st===3||h.st===7);
+  bp.classList.toggle("ready",ready);
+  const est=document.getElementById("bEstop"); est.setAttribute("aria-pressed", h.estop?"true":"false"); est.textContent=h.estop?"LIBERAR EMERGENCIA":"EMERGENCIA";
+  est.hidden=!!REAL;
+  [...stageList.children].forEach((li,i)=>li.classList.toggle("cur", !h.fault && i===h.st));
+  document.getElementById("bFix").hidden = REAL || !(h.fault && h.code===2);
+  if (!REAL){
+    document.getElementById("btnFork").disabled = !S.pallets.some(p=>!p.pushing && p.x+G.PW>=G.S3-1) || !!P.bits.Y0;
+  }
+}
+/* registro de cada saco (simulación) */
+function trackBags(){
+  const st=stageNow();
+  if (S.prevStage===5 && st===6) S.wcut=S.w;
+  if (S.prevStage===6 && (st===7)) recordBag(S.wcut, S.w);
+  S.prevStage=st;
+}
+function recordBag(wcut,wfin){
+  const sp=num("pSp",500), co=num("pCo",50);
+  const fall=wfin-wcut;
+  S.last={wcut,wfin,fall};
+  document.getElementById("sLast").textContent=fmt(wfin)+" g";
+  document.getElementById("sFall").textContent=fmt(fall)+" g";
+  const sug=Math.round(co + (wfin-sp));
+  const box=document.getElementById("suggest");
+  if (Math.abs(wfin-sp)>=3){ box.hidden=false; document.getElementById("suggestT").textContent=`Quedó ${wfin>sp?"sobre":"bajo"} la meta por ${fmt(Math.abs(wfin-sp))} g. Compensación sugerida: ${sug} g.`; box.dataset.v=sug; }
+  else box.hidden=true;
+}
+
+/* ================= Chips de E/S ================= */
+const XL=["X0","X1","X2","X3","X4","X5","X6","X7","X10","X11","X12","X20","X21","X22","X23","X24","X25"];
+const YL=["Y0","Y1","Y2","Y3","Y4","Y5","Y6","Y7","Y10","Y11","Y20","Y21","Y22","Y23"];
+function chips(id,list){ const h=document.getElementById(id); return list.map(a=>{ const s=document.createElement("span"); s.className="chip"; s.title=DEV[a][1]; s.innerHTML=`<i></i>${a} ${DEV[a][0]}`; h.appendChild(s); return [a,s]; }); }
+const XC=chips("xChips",XL), YC=chips("yChips",YL);
+function renderChips(){ for (const [a,s] of XC.concat(YC)) s.classList.toggle("on",!!P.bits[a]); }
+function renderLive(){
+  for (const L of live){
+    let on=false;
+    if (L.kind==="c") on = contactOK({a:L.a,nc:L.nc});
+    else { const o=L.o; on = (o.op==="OUT"||o.op==="T") ? bit(o.a) : !!R[L.ri].last; }
+    L.g.classList.toggle("on",on);
+  }
+  R.forEach(r=>r.row&&r.row.classList.toggle("true",!!r.last));
+}
+
+/* ================= Tablas ================= */
+function fillTables(){
+  const tx=document.getElementById("tbX"), ty=document.getElementById("tbY"), tm=document.getElementById("tbM");
+  XL.forEach(a=>tx.insertAdjacentHTML("beforeend",`<tr><td class="a">${a}</td><td>${DEV[a][1]}</td><td>${DEV[a][2]}</td></tr>`));
+  YL.forEach(a=>ty.insertAdjacentHTML("beforeend",`<tr><td class="a">${a}</td><td>${DEV[a][1]}</td><td>${DEV[a][2]}</td></tr>`));
+  tm.insertAdjacentHTML("beforeend",`<tr><td class="a">M0 a M11</td><td>Etapas 0 a 11 del proceso (una sola activa a la vez)</td></tr>`);
+  ["M100","M101","M102","M110","T0","T1","T2","T3","T4","D100","D101"].forEach(a=>tm.insertAdjacentHTML("beforeend",`<tr><td class="a">${a}</td><td>${DEV[a][1]}</td></tr>`));
+}
+
+/* ================= Copiar ================= */
+function copy(text, toastId){
+  const t=document.getElementById(toastId);
+  const done=()=>{ t.textContent="Copiado"; setTimeout(()=>t.textContent="",2000); };
+  try { navigator.clipboard.writeText(text).then(done,()=>{ t.textContent="No se pudo copiar: selecciona el texto a mano"; }); }
+  catch(e){ t.textContent="No se pudo copiar: selecciona el texto a mano"; }
+}
+function gxAddr(a){ const m=a.match(/^([XYMTD])(\d+)$/); if(!m) return a; return m[1]+(m[1]==="X"||m[1]==="Y"? m[2].padStart(3,"0"):m[2]); }
+function cmtList(pre, from, to, octal){
+  const out=[];
+  for (let n=from;n<=to;n++){
+    if (octal && /[89]/.test(String(n))) continue;
+    const a=pre+n; out.push(DEV[a]?DEV[a][0]:(pre==="M"&&n<=11?"ETAPA_"+n:""));
+  }
+  return out.join("\n");
+}
+document.getElementById("cmtBtns").addEventListener("click",e=>{
+  const g=e.target.closest("button"); if(!g) return;
+  const map={X:["X",0,25,true],Y:["Y",0,23,true],M0:["M",0,11],M100:["M",100,110],T:["T",0,4],D:["D",100,101]};
+  const [pre,a,b,oct]=map[g.dataset.g]; copy(cmtList(pre,a,b,oct),"tCmt");
+});
+document.getElementById("bCopyIL").addEventListener("click",()=>{
+  const out=[]; R.forEach((r,i)=>{ out.push("; "+String(i+1).padStart(2,"0")+" "+r.t); out.push(...ilOf(r)); }); out.push("END");
+  copy(out.join("\n"),"tIL");
+});
+document.getElementById("bCopyIno").addEventListener("click",()=>copy(document.getElementById("inoCode").textContent,"tIno"));
+
+/* ================= Botones ================= */
+function send(cmd){ if (REAL && REAL.writer) REAL.writer.write(new TextEncoder().encode(cmd+"\n")).catch(()=>{}); }
+document.getElementById("bPartir").addEventListener("click",()=>{ if(REAL) send("P"); else operatorPartir(); });
+document.getElementById("bMarcha").addEventListener("click",()=>{ if(REAL) send("M"); else pulse("X21"); });
+document.getElementById("bParo").addEventListener("click",()=>{ if(REAL) send("S"); else pulse("X22"); });
+document.getElementById("bReset").addEventListener("click",()=>{
+  if(REAL){ send("R"); return; }
+  if (P.bits.M101 && P.D.D101===4 && !S.estop){ S.pallets=S.pallets.filter(p=>p.pushing); S.queue=[]; }
+  pulse("X23");
+});
+document.getElementById("bEstop").addEventListener("click",()=>{ S.estop=!S.estop; });
+document.getElementById("bFix").addEventListener("click",()=>{ const s=station(); if(s&&s.bag) s.bag.g=num("pSp",500)-0.0; });
+document.getElementById("bApply").addEventListener("click",()=>{ const v=document.getElementById("suggest").dataset.v; if(v){ document.getElementById("pCo").value=v; paramsChanged(); document.getElementById("suggest").hidden=true; } });
+document.getElementById("btnFork").addEventListener("click",removeFork);
+document.getElementById("btnRefill").addEventListener("click",()=>{ S.store=6; });
+document.getElementById("btnRestart").addEventListener("click",()=>{ resetSim(); });
+function paramsChanged(){ updateParamsText(); if (REAL){ send("SP "+num("pSp",500)); send("CO "+num("pCo",50)); send("TL "+num("pTl",15)); } }
+["pSp","pCo","pTl"].forEach(id=>document.getElementById(id).addEventListener("change",paramsChanged));
+
+/* ================= Modo real (Web Serial) ================= */
+const realMsg=document.getElementById("realMsg");
+document.getElementById("bConnect").addEventListener("click", async ()=>{
+  if (!("serial" in navigator)){ realMsg.textContent="Este navegador o esta vista no permiten el puerto USB. Descarga la página y ábrela en Chrome o Edge en tu computador."; return; }
+  try{
+    const port=await navigator.serial.requestPort();
+    await port.open({baudRate:115200});
+    const writer=port.writable.getWriter();
+    REAL={st:0,run:0,w:0,writer};
+    realMsg.textContent="Conectado. La simulación se detuvo y la pantalla muestra la maqueta real.";
+    document.getElementById("bCal0").disabled=false; document.getElementById("bCal").disabled=false;
+    paramsChanged();
+    const reader=port.readable.pipeThrough(new TextDecoderStream()).getReader();
+    let buf="";
+    while(true){
+      const {value,done}=await reader.read(); if(done) break;
+      buf+=value; let i;
+      while((i=buf.indexOf("\n"))>=0){
+        const line=buf.slice(0,i).trim(); buf=buf.slice(i+1);
+        if(!line.startsWith("{")) continue;
+        try{
+          const m=JSON.parse(line);
+          if (m.evt==="fin"){ document.getElementById("sCount").textContent=(++S.count); recordBag(m.wcut,m.wfin); }
+          else if (m.msg){ realMsg.textContent=m.msg; }
+          else Object.assign(REAL,m);
+        }catch(e){}
+      }
+    }
+  }catch(e){ realMsg.textContent="No se pudo abrir el puerto: "+(e&&e.message?e.message:e)+". Revisa que el monitor serie del IDE de Arduino esté cerrado."; REAL=null; }
+});
+document.getElementById("bCal0").addEventListener("click",()=>send("CAL0"));
+document.getElementById("bCal").addEventListener("click",()=>send("CAL 500"));
+
+/* ================= Bucle principal ================= */
+function autoOperator(dt){
+  if (!document.getElementById("autoOp").checked) return;
+  const st=stageNow();
+  if (P.bits.M100 && !P.bits.M101 && (st===3||st===7)){ S.autoOpT+=dt; if (S.autoOpT>1.6){ operatorPartir(); S.autoOpT=0; } }
+  else S.autoOpT=0;
+  if (P.bits.M101 && P.D.D101===2){ const s=station(); if(s&&s.bag) s.bag.g=num("pSp",500); pulse("X23"); }
+}
+let lastT=performance.now(), acc=0, frame=0, prevCount=0;
+function loop(now){
+  const real=(now-lastT)/1000; lastT=now;
+  if (!REAL){
+    acc += Math.min(real,0.1)*parseFloat(document.getElementById("spd").value);
+    const dt=0.02;
+    while (acc>=dt){ physics(dt); scan(dt); autoOperator(dt); trackBags(); acc-=dt; }
+    renderMimic(); renderChips();
+    if ((frame++ & 3)===0) renderLive();
+  }
+  renderHMI();
+  requestAnimationFrame(loop);
+}
+
+/* ================= Inicio ================= */
+buildLadder(); fillTables(); resetSim(); buildMimic(); updateParamsText();
+physics(0.02); scan(0.02);
+renderMimic(); renderChips(); renderLive(); renderHMI();
+requestAnimationFrame(loop);
+</script>
